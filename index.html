@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Name – Portfolio</title>
+  <meta name="description" content="Portfolio of Your Name – projects, experience, and contact." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#101a2c; --text:#e6edf6; --muted:#9fb0c5; --accent:#4cc9f0; --border:#20304b;
+      --bg-light:#ffffff; --panel-light:#f7f9fc; --text-light:#111827; --muted-light:#475569; --border-light:#e5e7eb;
+    }
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;background:var(--bg);color:var(--text)}
+    [data-theme="light"] body{background:var(--bg-light);color:var(--text-light)}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    .header{position:sticky;top:0;backdrop-filter:saturate(180%) blur(12px);background:rgba(16,26,44,.7);border-bottom:1px solid var(--border);z-index:50}
+    [data-theme="light"] .header{background:rgba(255,255,255,.7);border-color:var(--border-light)}
+    .nav{display:flex;justify-content:space-between;align-items:center;padding:14px 0}
+    .nav a{margin:0 10px;font-size:14px;color:var(--muted)}
+    [data-theme="light"] .nav a{color:var(--muted-light)}
+    .brand{font-weight:800;letter-spacing:.2px}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);padding:10px 14px;border-radius:14px}
+    .btn.primary{background:var(--text);color:#0b1220;border-color:transparent}
+    [data-theme="light"] .btn.primary{background:#111827;color:#fff}
+    .hero{padding:60px 0}
+    .grid{display:grid;gap:28px}
+    @media(min-width:900px){.grid-2{grid-template-columns:1.2fr .8fr}}
+    .card{border:1px solid var(--border);background:var(--panel);border-radius:18px;padding:18px}
+    [data-theme="light"] .card{background:var(--panel-light);border-color:var(--border-light)}
+    h1{font-size:44px;line-height:1.1;margin:6px 0 10px}
+    h2{font-size:28px;margin:0 0 8px}
+    h3{margin:0 0 6px}
+    p{margin:8px 0;color:var(--muted)}
+    [data-theme="light"] p{color:var(--muted-light)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:13px}
+    .projects{display:grid;gap:18px}
+    @media(min-width:900px){.projects{grid-template-columns:repeat(2,1fr)}}
+    .proj img{width:100%;height:180px;object-fit:cover;border-radius:14px;border:1px solid var(--border)}
+    footer{border-top:1px solid var(--border);margin-top:40px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:transparent;color:inherit}
+    textarea{min-height:120px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .icon{width:18px;height:18px;vertical-align:-3px}
+    .theme-toggle{border:1px solid var(--border);padding:8px;border-radius:12px;background:transparent}
+    .hero-badge{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+    .hero-figure{aspect-ratio:1/1;border-radius:18px;overflow:hidden;border:1px solid var(--border)}
+  </style>
+</head>
+<body>
+  <header class="header">
+        <div class="container nav">
+      <a class="brand" href="#home">Mandeep Kour</a>
+      <nav class="hide-sm">
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </nav>
+<!-- Pin these buttons to the top-right corner -->
+<!-- Top-right corner: GitHub + LinkedIn -->
+<div class="row" style="position:fixed; top:10px; right:16px; z-index:1000; gap:8px">
+  <!-- GitHub -->
+  <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer"
+     aria-label="GitHub" title="GitHub" style="display:inline-flex;align-items:center;gap:8px">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+         viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 .5A11.5 11.5 0 0 0 .5 12.3c0 5.25 3.4 9.7 8.1 11.27.6.1.82-.27.82-.58l-.02-2.03c-3.3.73-4-1.6-4-1.6-.55-1.43-1.35-1.81-1.35-1.81-1.11-.78.08-.76.08-.76 1.22.09 1.87 1.27 1.87 1.27 1.1 1.9 2.9 1.35 3.6 1.03.11-.82.43-1.35.78-1.66-2.64-.31-5.41-1.36-5.41-6.06 0-1.34.47-2.43 1.25-3.29-.13-.31-.54-1.56.12-3.25 0 0 1.02-.33 3.34 1.25a11.5 11.5 0 0 1 6.08 0c2.32-1.58 3.33-1.25 3.33-1.25.66 1.69.25 2.94.12 3.25.78.86 1.25 1.95 1.25 3.29 0 4.71-2.78 5.74-5.43 6.05.44.38.83 1.12.83 2.26l-.01 3.35c0 .32.22.7.83.58A11.53 11.53 0 0 0 23.5 12.3 11.5 11.5 0 0 0 12 .5Z"/>
+    </svg>
+  </a>
+
+  <!-- LinkedIn -->
+  <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer"
+     aria-label="LinkedIn" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+         viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8 8.5h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.18 0-2.51 1.7-2.51 3.44V23H8V8.5z"/>
+    </svg>
+  </a>
+   <!-- Plum.io -->
+  <a class="btn" href="https://secure.plum.io/en/p/o9e7vYuoexHfRJGsinB_2w" target="_blank" rel="noreferrer"
+     aria-label="Plum Profile" title="Plum Profile"
+     style="display:inline-flex;align-items:center;gap:6px;justify-content:center">
+    Plum
+  </a>
+</div>
+
+  </header>
+
+
+  <main id="home" class="container">
+    <section class="hero grid grid-2">
+      <div>
+<!-- Replace your hero text block with this version -->
+<div>
+  <div class="hero-badge">Hello, I'm</div>
+  <h1>Mandeep Kour</h1>
+
+<!-- Location + Email with icons -->
+<p class="muted" style="margin:6px 0 14px; display:flex; flex-direction:column; gap:6px">
+  <span style="display:inline-flex; align-items:center; gap:6px">
+    <!-- Map pin icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+         viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+    </svg>
+    Oakville, Ontario
+  </span>
+
+  <span style="display:inline-flex; align-items:center; gap:6px">
+    <!-- Mail icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+         viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
+    </svg>
+    <a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a>
+  </span>
+</p>
+
+
+  <!-- One-liner -->
+  <p>Data/AI-focused professional building practical, fast, and useful solutions.</p>
+
+  <!-- Vertical buttons: GitHub, LinkedIn, Projects, Resume -->
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-width:260px">
+    <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer"
+       aria-label="GitHub" title="GitHub" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+      <!-- GitHub icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+           viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 .5A11.5 11.5 0 0 0 .5 12.3c0 5.25 3.4 9.7 8.1 11.27.6.1.82-.27.82-.58l-.02-2.03c-3.3.73-4-1.6-4-1.6-.55-1.43-1.35-1.81-1.35-1.81-1.11-.78.08-.76.08-.76 1.22.09 1.87 1.27 1.87 1.27 1.1 1.9 2.9 1.35 3.6 1.03.11-.82.43-1.35.78-1.66-2.64-.31-5.41-1.36-5.41-6.06 0-1.34.47-2.43 1.25-3.29-.13-.31-.54-1.56.12-3.25 0 0 1.02-.33 3.34 1.25a11.5 11.5 0 0 1 6.08 0c2.32-1.58 3.33-1.25 3.33-1.25.66 1.69.25 2.94.12 3.25.78.86 1.25 1.95 1.25 3.29 0 4.71-2.78 5.74-5.43 6.05.44.38.83 1.12.83 2.26l-.01 3.35c0 .32.22.7.83.58A11.53 11.53 0 0 0 23.5 12.3 11.5 11.5 0 0 0 12 .5Z"/>
+      </svg>
+      GitHub
+    </a>
+
+    <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer"
+       aria-label="LinkedIn" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+      <!-- LinkedIn icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+           viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8 8.5h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.18 0-2.51 1.7-2.51 3.44V23H8V8.5z"/>
+      </svg>
+      LinkedIn
+    </a>
+
+    <a class="btn" href="#projects" style="justify-content:center">Projects</a>
+
+    <a class="btn" href="C:\Users\highm\Downloads\Portfolio\Website_resume.pdf" download
+     style="display:inline-flex;align-items:center;gap:8px;justify-content:center"
+     aria-label="Download Resume" title="Download Resume">
+    <!-- Download icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+         viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3a1 1 0 0 1 1 1v7.59l2.3-2.3a1 1 0 0 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 11.6V4a1 1 0 0 1 1-1zM5 18a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/>
+    </svg>
+    Resume
+  </a>
+  </div>
+
+</div>
+
+
+<div class="row" style="margin-top:10px; gap:8px">
+
+</div>
+
+</div>
+
+    <div class="hero-figure">
+      <img src="C:\Users\highm\Downloads\Portfolio\image.png" alt="Hero" style="width:100%;height:100%;object-fit:cover"/>
+    </div>
+      </div>
+    </section>
+
+    <section id="about" class="grid" style="padding:20px 0">
+      <h2>About</h2>
+      <div class="card">
+        <p>
+          I’m a Data and AI–focused professional with a strong foundation in analytics, automation, and people operations
+          I enjoy bridging the gap between data and business by building tools that simplify complex decisions and deliver measurable value—fast
+          My approach combines technical problem-solving with a people-centric mindset, ensuring that every solution is both efficient and impactful
+        </p>
+      </div>
+    </section>
+
+    <section id="skills" style="padding:20px 0">
+      <h2>Skills</h2>
+      <div class="chips">
+        <span class="chip">Python</span>
+        <span class="chip">SQL</span>
+        <span class="chip">IBM Cognos</span>
+        <span class="chip">Power BI</span>
+        <span class="chip">Tableau</span>
+        <span class="chip">Google Looker</span>
+        <span class="chip">Generative AI</span>
+        <span class="chip">HTML/CSS</span>
+        <span class="chip">AWS-basics</span>
+        <span class="chip">Azure-Basics</span>
+        <!--<span class="chip">JavaScript</span>-->
+        <span class="chip">Github</span>
+      </div>
+    </section>
+
+    <section id="projects" style="padding:20px 0">
+      <h2>Projects</h2>
+      <div class="projects">
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/IBM-Cognos" target="_blank" rel="noreferrer">
+          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200" alt="Payroll Redactor" />
+          <h3>Dashboard – IBM Cognos</h3>
+          <p>Built an interactive job market dashboard in IBM Cognos using the Kaggle Naukri.com dataset: hiring trends, skills, demographics</p>
+        </a>
+        <!-- Tambola Project Card (fixed) -->
+         <a class="proj card"
+         href="https://github.com/MandeepKourSardarni/Tambola" target="_blank" rel="noreferrer">
+         <img src="https://raw.githubusercontent.com/MandeepKourSardarni/Tambola/main/Tambola.png" alt="Tambola Game" />
+         <h3>Tambola Game</h3>
+         <p>Projector-friendly Tambola (Housie) spinner with wheel, music, confetti, Excel export, ticket generator.</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Covid19-chest-xray-app/blob/main/README.md" target="_blank" rel="noreferrer">
+          <img src="C:\Users\highm\Downloads\Portfolio\Covid.png" alt="Chicago Crime Explorer" />
+          <h3>COVID-19 Detection from Chest X-Rays (VGG + Flask)</h3>
+          <p>End-to-end deep learning pipeline to classify COVID vs Normal on chest X-rays</p>
+        </a>
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/PDF-Pay_slip-Redactor" target="_blank" rel="noreferrer">
+          <img src="C:\Users\highm\Downloads\Portfolio\Redact.png" alt="Resume Keyword Scanner" />
+          <h3>PDF Payslip Redactor (PyMuPDF + Tesseract)</h3>
+          <p>Redacts sensitive info (SIN, addresses, emails, phones, banking info, DOB etc) from payslips</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="experience" style="padding:20px 0">
+      <h2>Experience</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>Business Analyst → Virtusa </strong>
+          <div class="muted">Jan 2022 – March 2023</div>
+          <ul>
+            <li>Streamlined workflows for data acquisition & reporting; enabled strategic planning via Excel, SharePoint & Tableau</li>
+            <li>Partnered with global stakeholders to capture & refine requirements</li>
+            <li>Produced governance decks & executive reports (DOR, WOR, MOR), boosting governance & visibility</li>
+            <li>Built trackers & KPI dashboards for SLA/OLA compliance, audits & process optimization</li>
+            <li>Resolved client escalations with RCA, ensured compliance, uncovered business opportunities</li>
+          </ul>
+        </div>
+        
+      </div>
+    </section>
+
+    <section id="Certifications" style="padding:20px 0">
+      <h2>Certifications</h2>
+      <div class="card">
+        <strong>IBM Data Analyst Professional Certificate</strong>    | SEP 2025 </p>
+        <strong>Microsoft Azure AI 900 Fundamentals Professional Certificate</strong>    | JUL 2025 </p>
+        <strong>Generative AI for Business with MS Azure with OpenAI</strong>    | APR 2024</p>
+        <strong>AWS Cloud practitioner essentials from AWS training and certification</strong>    | 2022</p>
+        <strong>AWS Cloud Economics Accreditation certificate from AWS training and certification</strong>    | 2022</p>
+        <strong>Udemy Business Analysis Fundamentals</strong>    | 2021</p>
+        <strong>Data Visualization using Tableau from Great Learning Academy</strong>    | 2021</p>
+
+      </div>
+    </section>
+
+    <section id="education" style="padding:20px 0">
+      <h2>Education</h2>
+      <div class="card">
+        <strong>Master’s in Data Science</strong> — University of Deakin | Australia | 2023-2024</p>
+        <strong>PG Program in AI/ML</strong> — Great Lakes and McCombs School of Business - University of Texas | USA | 2020-2022 </p>
+      </div>
+      <div class="card">
+          <strong>Junior Data Analyst Program • NPower Canada</strong>
+          <div class="muted">June 2025 - Sep 2025</div>
+          <ul>
+            <li>Data wrangling, analysis & visualization using Excel, Python (Pandas, NumPy, Matplotlib, Seaborn, Plotly, Dash), SQL & IBM Cognos/li>
+            <li>Completed capstone: data collection, EDA, statistical analysis & dashboarding</li>
+            <li>Gained hands-on experience in Agile Project Management lifecycle</li>
+          </ul>
+        </div>
+    </section>
+
+<section id="contact" style="padding:20px 0 40px">
+  <h2>Contact</h2>
+  <div class="row" style="gap:8px">
+    <!-- Tab 1: LinkedIn -->
+    <a
+      href="https://www.linkedin.com/in/mandeep-kour-sardarni/"
+      target="_blank"
+      rel="noreferrer"
+      style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px"
+    >
+      <i data-feather="linkedin" class="icon"></i> LinkedIn
+    </a>
+
+    <!-- Tab 2: Mail (opens Gmail compose with your address prefilled) -->
+    <a
+      href="https://mail.google.com/mail/?view=cm&fs=1&to=mandeepkour0917@gmail.com&su=Hello %20from %20your %20portfolio"
+      target="_blank"
+      rel="noreferrer"
+      style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px"
+    >
+      <i data-feather="mail" class="icon"></i> Mail
+    </a>
+  </div>
+</section>
+
+
+
+</main>
+
+<footer>
+<div class="container" style="padding:18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+<small class="muted">© <span id="year"></span> Mandeep </small>
+<div class="row">
+<a href="#home" class="muted">Top</a>
+<a href="#projects" class="muted">Projects</a>
+<a href="#contact" class="muted">Contact</a>
+</div>
+</div>
+</footer>
+
+
+<!-- Feather icons -->
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+// Show warning if opened as file:// (FormSubmit and many APIs need http/https)
+if(location.protocol === 'file:'){
+const w = document.getElementById('serverWarning');
+if(w) w.style.display = 'block';
+}
+</script>
+</body>
+</html>
