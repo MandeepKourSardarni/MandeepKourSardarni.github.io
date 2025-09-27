@@ -27,12 +27,13 @@
     }
     [data-theme="light"] body{color:var(--text-light)}
 
-    /* Double-buffered background video setup */
+    /* Double-buffered background video (NO inline opacity tweaks!) */
     .bg-video{
       position:fixed; inset:0; width:100%; height:100%;
       object-fit:cover; z-index:-2; pointer-events:none;
       opacity:0; transition:opacity var(--fade-s) linear;
-      background:#000; /* hides flash before first frame */
+      will-change: opacity; /* smoother fade */
+      background:#000;      /* hides flash before first frame */
     }
     .bg-video.active{ opacity:1; }
 
@@ -108,8 +109,8 @@
 
 <body>
   <!-- DOUBLE-BUFFERED BACKGROUND VIDEO -->
-  <video id="bgA" class="bg-video active" autoplay muted playsinline preload="auto" poster="/tech-poster.jpg"></video>
-  <video id="bgB" class="bg-video"        autoplay muted playsinline preload="auto" poster="/tech-poster.jpg"></video>
+  <video id="bgA" class="bg-video active" autoplay muted playsinline preload="auto" crossorigin="anonymous" poster="/tech-poster.jpg"></video>
+  <video id="bgB" class="bg-video"        autoplay muted playsinline preload="auto" crossorigin="anonymous" poster="/tech-poster.jpg"></video>
   <div class="video-overlay"></div>
 
   <header class="header">
@@ -130,13 +131,11 @@
             <path d="M12 .5A11.5 11.5 0 0 0 .5 12.3c0 5.25 3.4 9.7 8.1 11.27.6.1.82-.27.82-.58l-.02-2.03c-3.3.73-4-1.6-4-1.6-.55-1.43-1.35-1.81-1.35-1.81-1.11-.78.08-.76.08-.76 1.22.09 1.87 1.27 1.87 1.27 1.1 1.9 2.9 1.35 3.6 1.03.11-.82.43-1.35.78-1.66-2.64-.31-5.41-1.36-5.41-6.06 0-1.34.47-2.43 1.25-3.29-.13-.31-.54-1.56.12-3.25 0 0 1.02-.33 3.34 1.25a11.5 11.5 0 0 1 6.08 0c2.32-1.58 3.33-1.25 3.33-1.25.66 1.69.25 2.94.12 3.25.78.86 1.25 1.95 1.25 3.29 0 4.71-2.78 5.74-5.43 6.05.44.38.83 1.12.83 2.26l-.01 3.35c0 .32.22.7.83.58A11.53 11.53 0 0 0 23.5 12.3 11.5 11.5 0 0 0 12 .5Z"/>
           </svg>
         </a>
-
         <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8 8.5h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.18 0-2.51 1.7-2.51 3.44V23H8V8.5z"/>
           </svg>
         </a>
-
         <a class="btn" href="https://secure.plum.io/en/p/o9e7vYuoexHfRJGsinB_2w" target="_blank" rel="noreferrer" aria-label="Plum Profile" title="Plum Profile">Plum</a>
       </div>
     </div>
@@ -144,12 +143,9 @@
 
   <main id="home" class="container">
     <section class="hero grid grid-2">
-      <!-- left column -->
       <div>
         <div class="hero-badge">Hello, I'm</div>
         <h1>Mandeep Kour</h1>
-
-        <!-- location + email -->
         <p class="muted" style="margin:6px 0 14px; display:flex; flex-direction:column; gap:6px">
           <span style="display:inline-flex; align-items:center; gap:6px">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -164,10 +160,7 @@
             <a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a>
           </span>
         </p>
-
         <p>Data/AI-focused professional building practical, fast, and useful solutions.</p>
-        
-        <!-- vertical buttons -->
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-width:260px">
           <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" title="GitHub" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">GitHub</a>
           <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">LinkedIn</a>
@@ -176,7 +169,6 @@
         </div>
       </div>
 
-      <!-- right column: hero image -->
       <div class="hero-figure">
         <img src="https://MandeepKourSardarni.github.io/image.png" alt="Mandeep hero" loading="lazy" decoding="async" />
       </div>
@@ -327,40 +319,44 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // ---- Seamless background loop (double-buffering + crossfade) ----
-    const SRC = "https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/TechV.mp4";
+    const SRC_PRIMARY = "https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/Tech.mp4";
+    const SRC_FALLBACK = "/Tech.mp4"; // fast if hosted on your own domain
     const FADE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fade-s')) || 0.6;
-    const EARLY = FADE + 0.15; // start crossfade this many seconds before end
+    const EARLY = FADE + 0.15; // start crossfade before the end
 
     const vA = document.getElementById('bgA');
     const vB = document.getElementById('bgB');
+
+    // Try primary, then fallback once the site is deployed
     [vA, vB].forEach(v => {
-      v.src = SRC;
-      v.muted = true; v.playsInline = true; // ensure iOS inline play
+      v.src = SRC_PRIMARY;
+      v.muted = true;
+      v.playsInline = true; // iOS inline play
       v.load();
     });
 
     let active = vA, idle = vB, ticking = false;
 
     function primeIdle(){
+      // Prepare the off-screen video at t=0, ready to play immediately
       try { idle.currentTime = 0.001; } catch(_) {}
-      idle.play().catch(()=>{});         // pre-roll the idle video
-      idle.pause();                      // then pause so it's cached/decoded
-      idle.style.opacity = 0;
-      idle.classList.remove('active');
+      // Optional "warm up" to decode first frames on some browsers
+      idle.play().then(()=>idle.pause()).catch(()=>{ /* ignore */ });
+      idle.classList.remove('active'); // ensure hidden via class only
     }
 
     function swap(){
-      // Ensure idle starts exactly at beginning
+      // Start the next video at the beginning
       try { idle.currentTime = 0.001; } catch(_) {}
       idle.play().catch(()=>{});
-      idle.classList.add('active');  // fades in via CSS transition
-      active.classList.remove('active'); // fades out
+      idle.classList.add('active');       // fade in via CSS
+      active.classList.remove('active');  // fade out
 
       const prev = active;
       active = idle;
       idle = prev;
 
-      // After fade completes, pause the new idle to save CPU
+      // After fade completes, pause the one we just faded out to save CPU
       setTimeout(()=>{ idle.pause(); }, FADE * 1000 + 50);
     }
 
@@ -369,7 +365,7 @@
         requestAnimationFrame(loopTick);
         return;
       }
-      // Start crossfade before the end to avoid the seek stutter
+      // Crossfade slightly before the end to avoid the seek hitch
       if (active.currentTime >= active.duration - EARLY){
         swap();
         // Prep the now-idle instance for the next cycle
@@ -378,13 +374,25 @@
       requestAnimationFrame(loopTick);
     }
 
-    // Initialize
+    // Fallback: if timing drifts, still swap on 'ended'
+    [vA, vB].forEach(v => v.addEventListener('ended', () => {
+      if (v === active) swap();
+    }));
+
+    // Start the show
     vA.addEventListener('loadedmetadata', () => {
       vA.play().then(()=>{
         vA.classList.add('active'); // reveal first video
         primeIdle();
         if (!ticking){ ticking = true; requestAnimationFrame(loopTick); }
-      }).catch(()=>{ /* autoplay might be blocked if not muted; we set muted=true above */ });
+      }).catch(()=>{ /* if autoplay blocked, ensure muted=true (already set) */ });
+    });
+
+    // Optional: try switching to the faster local path if available
+    window.addEventListener('load', () => {
+      fetch(SRC_FALLBACK, { method: 'HEAD', cache: 'no-store' })
+        .then(r => { if (r.ok) [vA, vB].forEach(v => v.src = SRC_FALLBACK); })
+        .catch(()=>{});
     });
   </script>
 </body>
