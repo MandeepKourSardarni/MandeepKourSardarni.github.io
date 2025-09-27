@@ -13,6 +13,7 @@
     :root{
       --bg:#0b1220; --panel:#101a2c; --text:#e6edf6; --muted:#9fb0c5; --accent:#4cc9f0; --border:#20304b;
       --bg-light:#ffffff; --panel-light:#f7f9fc; --text-light:#111827; --muted-light:#475569; --border-light:#e5e7eb;
+      --fade-s:0.6; /* crossfade duration in seconds */
     }
     html{scroll-behavior:smooth}
 
@@ -26,11 +27,15 @@
     }
     [data-theme="light"] body{color:var(--text-light)}
 
-    /* Background video + overlay */
-    #bg-video{
+    /* Double-buffered background video setup */
+    .bg-video{
       position:fixed; inset:0; width:100%; height:100%;
-      object-fit:cover; z-index:-2;
+      object-fit:cover; z-index:-2; pointer-events:none;
+      opacity:0; transition:opacity var(--fade-s) linear;
+      background:#000; /* hides flash before first frame */
     }
+    .bg-video.active{ opacity:1; }
+
     .video-overlay{
       position:fixed; inset:0; z-index:-1; pointer-events:none;
       background:linear-gradient(180deg, rgba(8,12,20,.55), rgba(8,12,20,.55));
@@ -38,7 +43,7 @@
 
     /* Respect users who prefer reduced motion */
     @media (prefers-reduced-motion: reduce){
-      #bg-video{ display:none; }
+      .bg-video{ display:none; }
       .video-overlay{ display:none; }
       body{ background:var(--bg); }
       [data-theme="light"] body{ background:var(--bg-light); }
@@ -102,13 +107,9 @@
 </head>
 
 <body>
-  <!-- Fullscreen background video -->
-  <video id="bg-video" autoplay muted loop playsinline preload="metadata" poster="/tech-poster.jpg">
-    <!-- Raw GitHub URL (works anywhere) -->
-    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/TechV.mp4" type="video/mp4" />
-    <!-- Fast fallback when hosted on your GitHub Pages domain -->
-    <source src="/Tech.mp4" type="video/mp4" />
-  </video>
+  <!-- DOUBLE-BUFFERED BACKGROUND VIDEO -->
+  <video id="bgA" class="bg-video active" autoplay muted playsinline preload="auto" poster="/tech-poster.jpg"></video>
+  <video id="bgB" class="bg-video"        autoplay muted playsinline preload="auto" poster="/tech-poster.jpg"></video>
   <div class="video-overlay"></div>
 
   <header class="header">
@@ -324,7 +325,67 @@
   <script>
     if (window.feather) feather.replace();
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ---- Seamless background loop (double-buffering + crossfade) ----
+    const SRC = "https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/TechV.mp4";
+    const FADE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fade-s')) || 0.6;
+    const EARLY = FADE + 0.15; // start crossfade this many seconds before end
+
+    const vA = document.getElementById('bgA');
+    const vB = document.getElementById('bgB');
+    [vA, vB].forEach(v => {
+      v.src = SRC;
+      v.muted = true; v.playsInline = true; // ensure iOS inline play
+      v.load();
+    });
+
+    let active = vA, idle = vB, ticking = false;
+
+    function primeIdle(){
+      try { idle.currentTime = 0.001; } catch(_) {}
+      idle.play().catch(()=>{});         // pre-roll the idle video
+      idle.pause();                      // then pause so it's cached/decoded
+      idle.style.opacity = 0;
+      idle.classList.remove('active');
+    }
+
+    function swap(){
+      // Ensure idle starts exactly at beginning
+      try { idle.currentTime = 0.001; } catch(_) {}
+      idle.play().catch(()=>{});
+      idle.classList.add('active');  // fades in via CSS transition
+      active.classList.remove('active'); // fades out
+
+      const prev = active;
+      active = idle;
+      idle = prev;
+
+      // After fade completes, pause the new idle to save CPU
+      setTimeout(()=>{ idle.pause(); }, FADE * 1000 + 50);
+    }
+
+    function loopTick(){
+      if (!active || !isFinite(active.duration) || active.duration === 0){
+        requestAnimationFrame(loopTick);
+        return;
+      }
+      // Start crossfade before the end to avoid the seek stutter
+      if (active.currentTime >= active.duration - EARLY){
+        swap();
+        // Prep the now-idle instance for the next cycle
+        setTimeout(primeIdle, 200);
+      }
+      requestAnimationFrame(loopTick);
+    }
+
+    // Initialize
+    vA.addEventListener('loadedmetadata', () => {
+      vA.play().then(()=>{
+        vA.classList.add('active'); // reveal first video
+        primeIdle();
+        if (!ticking){ ticking = true; requestAnimationFrame(loopTick); }
+      }).catch(()=>{ /* autoplay might be blocked if not muted; we set muted=true above */ });
+    });
   </script>
 </body>
 </html>
-
