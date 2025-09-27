@@ -13,7 +13,6 @@
     :root{
       --bg:#0b1220; --panel:#101a2c; --text:#e6edf6; --muted:#9fb0c5; --accent:#4cc9f0; --border:#20304b;
       --bg-light:#ffffff; --panel-light:#f7f9fc; --text-light:#111827; --muted-light:#475569; --border-light:#e5e7eb;
-      --fade-s:0.6; /* crossfade duration in seconds */
     }
     html{scroll-behavior:smooth}
 
@@ -27,24 +26,19 @@
     }
     [data-theme="light"] body{color:var(--text-light)}
 
-    /* Double-buffered background video */
-    .bg-video{
+    /* Background video + overlay */
+    #bg-video{
       position:fixed; inset:0; width:100%; height:100%;
-      object-fit:cover; z-index:-2; pointer-events:none;
-      opacity:0; transition:opacity var(--fade-s) linear;
-      will-change: opacity;
-      background:#000; /* hides flash before first frame */
+      object-fit:cover; z-index:-2;
     }
-    .bg-video.active{ opacity:1; }
-
     .video-overlay{
       position:fixed; inset:0; z-index:-1; pointer-events:none;
       background:linear-gradient(180deg, rgba(8,12,20,.55), rgba(8,12,20,.55));
     }
 
-    /* Respect reduced motion */
+    /* Respect users who prefer reduced motion */
     @media (prefers-reduced-motion: reduce){
-      .bg-video{ display:none; }
+      #bg-video{ display:none; }
       .video-overlay{ display:none; }
       body{ background:var(--bg); }
       [data-theme="light"] body{ background:var(--bg-light); }
@@ -101,20 +95,19 @@
     .hero-figure{aspect-ratio:1/1;border-radius:18px;overflow:hidden;border:1px solid var(--border)}
     .hero-figure img{width:100%;height:100%;object-fit:cover;display:block}
 
+    /* make desktop nav hide on small screens (optional) */
     .hide-sm{display:none}
     @media(min-width:640px){.hide-sm{display:flex}}
   </style>
 </head>
 
 <body>
-  <!-- DOUBLE-BUFFERED BACKGROUND VIDEO (sources inline; autoplay-safe) -->
-  <video id="bgA" class="bg-video active" autoplay muted playsinline preload="auto" crossorigin="anonymous" poster="/tech-poster.jpg">
-    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/Tech.mp4" type="video/mp4">
-    <source src="/Tech.mp4" type="video/mp4">
-  </video>
-  <video id="bgB" class="bg-video" autoplay muted playsinline preload="auto" crossorigin="anonymous" poster="/tech-poster.jpg">
-    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/Tech.mp4" type="video/mp4">
-    <source src="/Tech.mp4" type="video/mp4">
+  <!-- Fullscreen background video -->
+  <video id="bg-video" autoplay muted loop playsinline preload="metadata" poster="/tech-poster.jpg">
+    <!-- Raw GitHub URL (works anywhere) -->
+    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/Tech.mp4" type="video/mp4" />
+    <!-- Fast fallback when hosted on your GitHub Pages domain -->
+    <source src="/Tech.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
 
@@ -129,9 +122,20 @@
         <a href="#contact">Contact</a>
       </nav>
 
+      <!-- top-right fixed buttons -->
       <div class="row" style="position:fixed; top:10px; right:16px; z-index:1000; gap:8px">
-        <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">GitHub</a>
-        <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">LinkedIn</a>
+        <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 .5A11.5 11.5 0 0 0 .5 12.3c0 5.25 3.4 9.7 8.1 11.27.6.1.82-.27.82-.58l-.02-2.03c-3.3.73-4-1.6-4-1.6-.55-1.43-1.35-1.81-1.35-1.81-1.11-.78.08-.76.08-.76 1.22.09 1.87 1.27 1.87 1.27 1.1 1.9 2.9 1.35 3.6 1.03.11-.82.43-1.35.78-1.66-2.64-.31-5.41-1.36-5.41-6.06 0-1.34.47-2.43 1.25-3.29-.13-.31-.54-1.56.12-3.25 0 0 1.02-.33 3.34 1.25a11.5 11.5 0 0 1 6.08 0c2.32-1.58 3.33-1.25 3.33-1.25.66 1.69.25 2.94.12 3.25.78.86 1.25 1.95 1.25 3.29 0 4.71-2.78 5.74-5.43 6.05.44.38.83 1.12.83 2.26l-.01 3.35c0 .32.22.7.83.58A11.53 11.53 0 0 0 23.5 12.3 11.5 11.5 0 0 0 12 .5Z"/>
+          </svg>
+        </a>
+
+        <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8 8.5h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.18 0-2.51 1.7-2.51 3.44V23H8V8.5z"/>
+          </svg>
+        </a>
+
         <a class="btn" href="https://secure.plum.io/en/p/o9e7vYuoexHfRJGsinB_2w" target="_blank" rel="noreferrer" aria-label="Plum Profile" title="Plum Profile">Plum</a>
       </div>
     </div>
@@ -139,33 +143,169 @@
 
   <main id="home" class="container">
     <section class="hero grid grid-2">
+      <!-- left column -->
       <div>
         <div class="hero-badge">Hello, I'm</div>
         <h1>Mandeep Kour</h1>
+
+        <!-- location + email -->
         <p class="muted" style="margin:6px 0 14px; display:flex; flex-direction:column; gap:6px">
-          <span style="display:inline-flex; align-items:center; gap:6px">Oakville, Ontario</span>
-          <span style="display:inline-flex; align-items:center; gap:6px"><a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a></span>
+          <span style="display:inline-flex; align-items:center; gap:6px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+            </svg>
+            Oakville, Ontario
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:6px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
+            </svg>
+            <a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a>
+          </span>
         </p>
+
         <p>Data/AI-focused professional building practical, fast, and useful solutions.</p>
+        
+        <!-- vertical buttons -->
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-width:260px">
-          <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer">GitHub</a>
-          <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <a class="btn" href="#projects">Projects</a>
-          <a class="btn" href="./Website_resume.pdf" download>Resume</a>
+          <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" title="GitHub" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">GitHub</a>
+          <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">LinkedIn</a>
+          <a class="btn" href="#projects" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Projects</a>
+          <a class="btn" href="./Website_resume.pdf" download title="Download Resume" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Resume</a>
         </div>
       </div>
 
+      <!-- right column: hero image -->
       <div class="hero-figure">
         <img src="https://MandeepKourSardarni.github.io/image.png" alt="Mandeep hero" loading="lazy" decoding="async" />
       </div>
     </section>
 
-    <!-- (rest of your sections unchanged for brevity) -->
     <section id="about" class="grid" style="padding:20px 0">
       <h2>About</h2>
-      <div class="card"><p>I’m a Data and AI–focused professional...</p></div>
+      <div class="card">
+        <p>
+          I’m a Data and AI–focused professional with a strong foundation in analytics, automation, and people operations.
+          I enjoy bridging the gap between data and business by building tools that simplify complex decisions and deliver measurable value—fast.
+          My approach combines technical problem-solving with a people-centric mindset, ensuring every solution is both efficient and impactful.
+        </p>
+      </div>
     </section>
-    <!-- Skills / Projects / Experience / Certifications / Education / Contact sections go here... -->
+
+    <section id="skills" style="padding:20px 0">
+      <h2>Skills</h2>
+      <div class="chips">
+        <span class="chip">Python</span>
+        <span class="chip">SQL</span>
+        <span class="chip">IBM Cognos</span>
+        <span class="chip">Power BI</span>
+        <span class="chip">Tableau</span>
+        <span class="chip">Google Looker</span>
+        <span class="chip">Generative AI</span>
+        <span class="chip">HTML/CSS</span>
+        <span class="chip">AWS (basics)</span>
+        <span class="chip">Azure (basics)</span>
+        <span class="chip">GitHub</span>
+      </div>
+    </section>
+
+    <section id="projects" style="padding:20px 0">
+      <h2>Projects</h2>
+      <div class="projects">
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/IBM-Cognos" target="_blank" rel="noreferrer">
+          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200" alt="IBM Cognos Dashboard" />
+          <h3>Dashboard – IBM Cognos</h3>
+          <p>Interactive job market dashboard (Naukri dataset): hiring trends, skills, demographics.</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Tambola" target="_blank" rel="noreferrer">
+          <img src="https://raw.githubusercontent.com/MandeepKourSardarni/Tambola/main/Tambola.png" alt="Tambola Game" />
+          <h3>Tambola/Bingo/Housie Game</h3>
+          <p>Projector-friendly spinner with wheel, music, confetti, Excel export, ticket generator.</p>
+        </a>
+
+        <a class="proj card" href="https://mandeepkoursardarni.github.io/Human_Bingo/" target="_blank" rel="noreferrer">
+          <img src="H_Bingo.png" alt="Human_Tambola" />
+          <h3>Human Bingo — Ice breaker</h3>
+          <p>Interactive Human Bingo — Player, Host & Bulk tickets download option</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Covid19-chest-xray-app" target="_blank" rel="noreferrer">
+          <img src="https://MandeepKourSardarni.github.io/Covid.png" alt="COVID-19 X-ray project" />
+          <h3>COVID-19 Detection from Chest X-Rays (VGG + Flask)</h3>
+          <p>End-to-end deep learning pipeline to classify COVID vs Normal on chest X-rays.</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Payslip_Redactor" target="_blank" rel="noreferrer">
+          <img src="https://MandeepKourSardarni.github.io/Redact.png" alt="PDF Payslip Redactor" />
+          <h3>PDF Payslip Redactor (PyMuPDF + Tesseract)</h3>
+          <p>Redacts SIN, addresses, emails, phones, banking info, DOB, and more.</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="experience" style="padding:20px 0">
+      <h2>Experience</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>Business Analyst → Virtusa</strong>
+          <div class="muted">Jan 2022 – Mar 2023</div>
+          <ul>
+            <li>Streamlined workflows for data acquisition & reporting; enabled planning via Excel, SharePoint & Tableau.</li>
+            <li>Partnered with global stakeholders to capture & refine requirements.</li>
+            <li>Produced governance decks & executive reports (DOR, WOR, MOR).</li>
+            <li>Built trackers & KPI dashboards for SLA/OLA compliance, audits & optimization.</li>
+            <li>Resolved client escalations with RCA, ensured compliance, uncovered opportunities.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="certifications" style="padding:20px 0">
+      <h2>Certifications</h2>
+      <div class="card">
+        <p><strong>IBM Data Analyst Professional Certificate</strong> — Sep 2025</p>
+        <p><strong>Microsoft Azure AI-900 Fundamentals</strong> — Jul 2025</p>
+        <p><strong>Generative AI for Business (MS Azure + OpenAI)</strong> — Apr 2024</p>
+        <p><strong>AWS Cloud Practitioner Essentials</strong> — 2022</p>
+        <p><strong>AWS Cloud Economics Accreditation</strong> — 2022</p>
+        <p><strong>Udemy: Business Analysis Fundamentals</strong> — 2021</p>
+        <p><strong>Great Learning: Data Visualization with Tableau</strong> — 2021</p>
+      </div>
+    </section>
+
+    <section id="education" style="padding:20px 0">
+      <h2>Education</h2>
+      <div class="card">
+        <p><strong>Master’s in Data Science</strong> — Deakin University, Australia (2023–2024)</p>
+        <p><strong>PG Program in AI/ML</strong> — Great Lakes & UT Austin McCombs, USA (2020–2022)</p>
+      </div>
+
+      <div class="card">
+        <strong>Junior Data Analyst Program • NPower Canada</strong>
+        <div class="muted">Jun 2025 – Sep 2025</div>
+        <ul>
+          <li>Data wrangling, analysis & visualization using Excel, Python (Pandas, NumPy, Matplotlib, Seaborn, Plotly, Dash), SQL & IBM Cognos.</li>
+          <li>Capstone: data collection, EDA, statistical analysis & dashboarding.</li>
+          <li>Hands-on with Agile Project Management lifecycle.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact" style="padding:20px 0 40px">
+      <h2>Contact</h2>
+      <div class="row" style="gap:8px">
+        <a href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
+          <i data-feather="linkedin" class="icon"></i> LinkedIn
+        </a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mandeepkour0917@gmail.com&su=Hello%20from%20your%20portfolio"
+           target="_blank" rel="noreferrer"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
+          <i data-feather="mail" class="icon"></i> Mail
+        </a>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -179,67 +319,11 @@
     </div>
   </footer>
 
+  <!-- Feather icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
   <script>
+    if (window.feather) feather.replace();
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // ---------- Seamless crossfade controller ----------
-    const FADE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fade-s')) || 0.6;
-    const SAFETY = 0.15; // start a hair before end
-    const vA = document.getElementById('bgA');
-    const vB = document.getElementById('bgB');
-    let active = vA, idle = vB, ticking = false;
-
-    function safePlay(v){ const p = v.play(); if (p && p.catch) p.catch(()=>{}); }
-
-    function ensureReady(v, cb){
-      if (v.readyState >= 1) cb(); // HAVE_METADATA
-      else v.addEventListener('loadedmetadata', cb, { once:true });
-    }
-
-    function primeIdle(){
-      try { idle.currentTime = 0.001; } catch(_) {}
-      safePlay(idle); idle.pause();   // warm decode first frames
-      idle.classList.remove('active');
-    }
-
-    function swap(){
-      try { idle.currentTime = 0.001; } catch(_) {}
-      // ORDER MATTERS: show new first, then hide old (never both hidden)
-      safePlay(idle);
-      idle.classList.add('active');       // fade in
-      active.classList.remove('active');  // fade out
-
-      const prev = active; active = idle; idle = prev;
-      setTimeout(()=>{ idle.pause(); }, FADE*1000 + 40);
-    }
-
-    function tick(){
-      if (!active || !isFinite(active.duration) || active.duration === 0){
-        requestAnimationFrame(tick);
-        return;
-      }
-      const early = Math.max(0.3, FADE + SAFETY); // cap minimum margin
-      if (active.currentTime >= active.duration - early){
-        swap();
-        setTimeout(primeIdle, 200);
-      }
-      requestAnimationFrame(tick);
-    }
-
-    // Start once first video is ready
-    ensureReady(vA, () => {
-      safePlay(vA);
-      vA.classList.add('active');
-      ensureReady(vB, primeIdle);
-      if (!ticking){ ticking = true; requestAnimationFrame(tick); }
-    });
-
-    // Absolute fallback: user gesture to force play if a browser blocks autoplay
-    const kick = () => { safePlay(vA); safePlay(vB); document.removeEventListener('pointerdown', kick); };
-    document.addEventListener('pointerdown', kick, { once:true });
-
-    // Safety: if something ends (no loop attr), we still swap
-    [vA, vB].forEach(v => v.addEventListener('ended', () => { if (v===active) swap(); }));
   </script>
 </body>
 </html>
