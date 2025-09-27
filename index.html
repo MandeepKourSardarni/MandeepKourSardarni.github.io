@@ -1,331 +1,803 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
+  <!--
+    Human Bingo — Single-file Web App (Video background edition)
+    -------------------------------------------------------------
+    Changes in this version:
+    - Adds a full-viewport looping background <video> across all screens
+    - Removes the string/carnival lights canvas + script
+  -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mandeep Kour – Portfolio</title>
-  <meta name="description" content="Portfolio of Mandeep Kour – projects, experience, and contact." />
+  <title>Human Bingo</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#0b1220; --panel:#101a2c; --text:#e6edf6; --muted:#9fb0c5; --accent:#4cc9f0; --border:#20304b;
-      --bg-light:#ffffff; --panel-light:#f7f9fc; --text-light:#111827; --muted-light:#475569; --border-light:#e5e7eb;
+      --bg1:#000; --bg2:#000; --bg3:#000;              /* fallback behind video */
+      --text:#fff;
+      --panel:#223296; --panel2:#1b287a;
+      --accent:#8be9fd;
+      --ok:#74f2a3; --warn:#ffd166; --pink:#ff9ccf;
+      --radius:18px;
+      --headerH:76px;
     }
-    html{scroll-behavior:smooth}
-
-    /* Let the video show through */
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      line-height:1.6;
-      background:transparent;
-      color:var(--text)
-    }
-    [data-theme="light"] body{color:var(--text-light)}
-
-    /* Background video + overlay */
-    #bg-video{
-      position:fixed; inset:0; width:100%; height:100%;
-      object-fit:cover; z-index:-2;
-    }
-    .video-overlay{
-      position:fixed; inset:0; z-index:-1; pointer-events:none;
-      background:linear-gradient(180deg, rgba(8,12,20,.55), rgba(8,12,20,.55));
+      margin:0; color:var(--text);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+      overflow:hidden;
     }
 
-    /* Respect users who prefer reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      #bg-video{ display:none; }
-      .video-overlay{ display:none; }
-      body{ background:var(--bg); }
-      [data-theme="light"] body{ background:var(--bg-light); }
+    /* Full-viewport background video */
+    #bgVideo{position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; filter:brightness(.6);} /* darken for text contrast */
+
+    /* Header */
+    header{
+      position:relative; z-index:3;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:18px clamp(16px,4vw,40px); color:#fff;
     }
-
-    a{color:inherit;text-decoration:none}
-    .container{max-width:1100px;margin:0 auto;padding:0 16px}
-
-    .header{
-      position:sticky;top:0;
-      backdrop-filter:saturate(180%) blur(12px);
-      background:rgba(16,26,44,.7);
-      border-bottom:1px solid var(--border);
-      z-index:50
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-family:Quicksand,Inter; font-weight:800; letter-spacing:.2px;
+      font-size:clamp(18px,3.2vw,26px); color:#fff
     }
-    [data-theme="light"] .header{background:rgba(255,255,255,.7);border-color:var(--border-light)}
-    .nav{display:flex;justify-content:space-between;align-items:center;padding:14px 0}
-    .nav a{margin:0 10px;font-size:14px;color:var(--muted)}
-    [data-theme="light"] .nav a{color:var(--muted-light)}
-    .brand{font-weight:800;letter-spacing:.2px}
+    .brand .dot{
+      width:30px; height:30px; border-radius:50%;
+      display:inline-grid; place-items:center;
+      background:conic-gradient(#ff4d4d,#ff9f1c,#ffd166,#06d6a0,#1e90ff,#c77dff,#ff4d4d);
+    }
+    .controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .btn{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:2px solid var(--accent); color:#fff; border-radius:12px;
+      padding:10px 14px; font-weight:700; cursor:pointer;
+      transition:.12s ease transform, .2s ease background, .2s ease border-color;
+      font-family:Quicksand,Inter;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .pill{border-radius:999px}
 
-    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);padding:10px 14px;border-radius:14px;background:rgba(16,26,44,.45);backdrop-filter:saturate(140%) blur(2px)}
-    .btn.primary{background:var(--text);color:#0b1220;border-color:transparent}
-    [data-theme="light"] .btn.primary{background:#111827;color:#fff}
+    .select-wrap{position:relative; display:inline-block}
+    select.select{
+      appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:2px solid var(--accent); border-radius:999px;
+      padding:10px 38px 10px 14px; color:#fff; font-weight:800; cursor:pointer;
+      font-family:Quicksand,Inter;
+    }
+    .select-wrap::after{content:"▾"; position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#fff; opacity:.9}
+    select.select option{ color:#111; background:#fff; }
 
-    .hero{padding:60px 0}
-    .grid{display:grid;gap:28px}
-    @media(min-width:900px){.grid-2{grid-template-columns:1.2fr .8fr}}
+    /* Router: full-viewport screens under header */
+    main.screen, section.screen{
+      position:fixed; top:var(--headerH); left:0; right:0; bottom:0;
+      overflow:auto; z-index:1; padding:16px clamp(16px,4vw,40px) 60px; color:#fff; display:none;
+    }
+    .screen.active{ display:block; }
 
-    .card{border:1px solid var(--border);background:rgba(16,26,44,.65);border-radius:18px;padding:18px}
-    [data-theme="light"] .card{background:rgba(247,249,252,.85);border-color:var(--border-light)}
+    /* Landing */
+    #landing.active{ display:grid; place-items:center; }
+    .hero{
+      width:min(1040px,96vw);
+      text-align:center; color:#fff;
+      background:linear-gradient(180deg,rgba(26,35,94,.44),rgba(22,34,92,.44));
+      border:2px solid var(--accent); border-radius:22px; padding:36px 28px 30px;
+      backdrop-filter: blur(4px);
+    }
+    .hero h1{margin:0 0 6px; font-family:Quicksand,Inter; font-weight:900; font-size:clamp(34px,6vw,56px); color:#fff}
+    .tag{margin:0 6px 18px; font-weight:600; color:#fff}
+    .options{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-top:18px}
+    .choice{
+      min-height:110px; padding:22px; text-align:center; font-weight:800; color:#fff;
+      border-radius:16px; border:2px solid var(--accent);
+      background:linear-gradient(180deg,var(--panel),#1f2f85);
+      cursor:pointer; transition:.15s transform, .25s background, .25s border-color;
+    }
+    .choice strong{ font-size: calc(1em + 2px); } /* +2px only for the title line */
+    .choice:hover{transform:translateY(-2px)}
+    .mini{font-size:12px; color:#fff}
 
-    h1{font-size:44px;line-height:1.1;margin:6px 0 10px}
-    h2{font-size:28px;margin:0 0 8px}
-    h3{margin:0 0 6px}
-    p{margin:8px 0;color:var(--muted)}
-    [data-theme="light"] p{color:var(--muted-light)}
-    .muted{color:var(--muted)}
+    .themeRow{display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px}
+    .themeRow .select-wrap select{ padding:8px 32px 8px 12px; font-size:13px }
 
-    .chips{display:flex;flex-wrap:wrap;gap:8px}
-    .chip{border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:13px;background:rgba(16,26,44,.55)}
+    /* Selectable helpers */
+    .btn.selectable{min-width:64px}
+    .btn.selectable.selected{ background:linear-gradient(180deg,#2156d8,#203fb5); border-color:#fff; }
 
-    .projects{display:grid;gap:18px}
-    @media(min-width:900px){.projects{grid-template-columns:repeat(2,1fr)}}
-    .proj img{width:100%;height:180px;object-fit:cover;border-radius:14px;border:1px solid var(--border)}
+    /* Cards / board */
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px}
+    .card{
+      background:linear-gradient(180deg,#21319b,#1a2676);
+      border:1px solid #ffffff2a; border-radius:var(--radius); color:#fff; overflow:hidden;
+      backdrop-filter: blur(3px);
+    }
+    .card-header{display:flex; justify-content:space-between; align-items:center; padding:14px; color:#fff}
+    .card-title{font-weight:800; color:#fff}
+    .board{padding:12px}
+    .board table{width:100%; border-collapse:separate; border-spacing:10px}
+    .board td{
+      background:linear-gradient(180deg,#2433a8,#1b2a83);
+      border:1px solid #ffffff44; border-radius:12px; padding:12px; color:#fff;
+      text-align:center; vertical-align:middle; height:56px; font-weight:700; font-size:12.5px;
+      line-height:1.2; cursor:pointer; user-select:none;
+      touch-action: manipulation;                 /* instant taps */
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+    }
+    .board td.free{
+      background: radial-gradient(140px 70px at 50% 40%, var(--warn), var(--pink));
+      color:#160820; border-color:#ffffff66; font-weight:800; letter-spacing:.4px;
+    }
+    .board td.marked{ outline:2px solid var(--ok) }
 
-    footer{border-top:1px solid var(--border);margin-top:40px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
+    /* Toolbars */
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0 16px; color:#fff}
+    .seg{display:flex; gap:8px; align-items:center}
+    .hint{font-size:12px; color:#fff}
 
-    input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:transparent;color:inherit}
-    textarea{min-height:120px}
+    /* Host */
+    .host-wrap{max-width:1100px; margin:auto; color:#fff}
+    .host-big{
+      margin-top:8px; display:grid; place-items:center; height:44vh;
+      background:linear-gradient(180deg,#2233a8,#1a2a86);
+      border:2px solid var(--accent); border-radius:22px; padding:18px; text-align:center; color:#fff;
+      backdrop-filter: blur(3px);
+    }
+    .host-current{font-size:clamp(22px,3.6vw,42px); font-weight:900; color:#fff}
+    .chips{display:flex; gap:8px; flex-wrap:wrap; max-height:28vh; overflow:auto; margin-top:10px}
+    .chip{background:#20308f; border:2px solid var(--accent); border-radius:999px; padding:6px 10px; font-size:12px; color:#fff}
 
-    .hero-badge{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-    .hero-figure{aspect-ratio:1/1;border-radius:18px;overflow:hidden;border:1px solid var(--border)}
-    .hero-figure img{width:100%;height:100%;object-fit:cover;display:block}
+    /* Modal shells (reused for Rules + QR) */
+    .rules{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.42); backdrop-filter:blur(4px); z-index:5}
+    .sheet{
+      width:min(680px,92vw); background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:2px solid var(--accent); border-radius:20px; padding:20px; color:#fff;
+    }
+    .sheet h3{margin:0 0 10px; font-family:Quicksand,Inter; font-weight:800; color:#fff}
+    .sheet ul{margin:8px 0 0 18px}
+    .sheet .closeRow{display:flex; justify-content:flex-end; margin-top:12px; gap:8px}
 
-    /* make desktop nav hide on small screens (optional) */
-    .hide-sm{display:none}
-    @media(min-width:640px){.hide-sm{display:flex}}
+    /* Confetti */
+    .confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:6}
+    .confetti span{position:absolute; width:10px; height:14px; opacity:.95; border-radius:2px; animation:fall 1200ms linear forwards}
+    @keyframes fall{to{transform:translateY(100vh) rotate(600deg); opacity:.2}}
+
+    .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* White text overrides (onscreen) */
+    body, header, main.screen, section.screen,
+    .hero, .tag, .controls, .btn, .choice, .mini, .hint,
+    .card, .card-header, .card-title, .board, .board td,
+    .host-wrap, .host-big, .host-current, .chips, .chip,
+    .sheet, .rules, .toolbar, .seg, .themeRow, label,
+    a { color:#fff !important; }
+    /* Keep native dropdown options readable */
+    select.select option{ color:#111; background:#fff; }
+
+    @media print{
+      body{ overflow:visible }
+      header, #landing, #player:not(.active), #host:not(.active), #bulk:not(.active), #bgVideo { display:none !important; }
+      .screen{ position:static; inset:auto; display:block; }
+      .card{ border:1px solid #0002 }
+      .board td{ color:#000; background:#fff; border-color:#0003 }
+      .board td.free{ background:#ffe98a !important }
+    }
   </style>
 </head>
-
 <body>
-  <!-- Fullscreen background video -->
-  <video id="bg-video" autoplay muted loop playsinline preload="metadata" poster="/tech-poster.jpg">
-    <!-- Raw GitHub URL (works anywhere) -->
-    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/TechV.mp4" type="video/mp4" />
-    <!-- Fast fallback when hosted on your GitHub Pages domain -->
-    <source src="/Tech.mp4" type="video/mp4" />
+  <!-- Background Video -->
+  <video id="bgVideo" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <!-- Prefer local file if deployed (fastest) -->
+    <source src="assets/Play1.mp4" type="video/mp4" />
+    <!-- Raw GitHub fallback (use raw.githubusercontent.com, not the repo HTML page) -->
+    <source src="https://raw.githubusercontent.com/MandeepKourSardarni/Human_Bingo/main/assets/Play1.mp4" type="video/mp4" />
   </video>
-  <div class="video-overlay"></div>
 
-  <header class="header">
-    <div class="container nav">
-      <a class="brand" href="#home">Mandeep Kour</a>
-      <nav class="hide-sm">
-        <a href="#about">About</a>
-        <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
-        <a href="#contact">Contact</a>
-      </nav>
-
-      <!-- top-right fixed buttons -->
-      <div class="row" style="position:fixed; top:10px; right:16px; z-index:1000; gap:8px">
-        <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 .5A11.5 11.5 0 0 0 .5 12.3c0 5.25 3.4 9.7 8.1 11.27.6.1.82-.27.82-.58l-.02-2.03c-3.3.73-4-1.6-4-1.6-.55-1.43-1.35-1.81-1.35-1.81-1.11-.78.08-.76.08-.76 1.22.09 1.87 1.27 1.87 1.27 1.1 1.9 2.9 1.35 3.6 1.03.11-.82.43-1.35.78-1.66-2.64-.31-5.41-1.36-5.41-6.06 0-1.34.47-2.43 1.25-3.29-.13-.31-.54-1.56.12-3.25 0 0 1.02-.33 3.34 1.25a11.5 11.5 0 0 1 6.08 0c2.32-1.58 3.33-1.25 3.33-1.25.66 1.69.25 2.94.12 3.25.78.86 1.25 1.95 1.25 3.29 0 4.71-2.78 5.74-5.43 6.05.44.38.83 1.12.83 2.26l-.01 3.35c0 .32.22.7.83.58A11.53 11.53 0 0 0 23.5 12.3 11.5 11.5 0 0 0 12 .5Z"/>
-          </svg>
-        </a>
-
-        <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8 8.5h3.8v2h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V23h-4v-6.5c0-1.55-.03-3.55-2.17-3.55-2.18 0-2.51 1.7-2.51 3.44V23H8V8.5z"/>
-          </svg>
-        </a>
-
-        <a class="btn" href="https://secure.plum.io/en/p/o9e7vYuoexHfRJGsinB_2w" target="_blank" rel="noreferrer" aria-label="Plum Profile" title="Plum Profile">Plum</a>
+  <!-- Header -->
+  <header id="appHeader">
+    <div class="brand"><span class="dot" aria-hidden="true"></span>Human Bingo</div>
+    <div class="controls">
+      <div class="select-wrap">
+        <label class="sr-only" for="musicMode">Music</label>
+        <select id="musicMode" class="select" title="Music">
+          <option value="assets/bensound-ukulele.mp3">Bensound Ukulele (MP3)</option>
+          <option value="assets/unbreakableresolve.mp3">Unbreakable Resolve (MP3)</option>
+          <option value="assets/cute.mp3">Cute (MP3)</option>
+        </select>
       </div>
+      <button id="musicToggle" class="btn pill" type="button">Music On/Off</button>
+      <button id="resetAll" class="btn pill" type="button">Reset</button>
+      <button id="openRules" class="btn pill" type="button">Rules</button>
+      <button id="openQR" class="btn pill" type="button">QR</button>
     </div>
   </header>
 
-  <main id="home" class="container">
-    <section class="hero grid grid-2">
-      <!-- left column -->
-      <div>
-        <div class="hero-badge">Hello, I'm</div>
-        <h1>Mandeep Kour</h1>
+  <!-- Landing -->
+  <main id="landing" class="screen active" aria-labelledby="hero-title">
+    <div class="hero">
+      <h1 id="hero-title">Human Bingo</h1>
+      <p class="tag">Break the ice. Build the vibe.</p>
 
-        <!-- location + email -->
-        <p class="muted" style="margin:6px 0 14px; display:flex; flex-direction:column; gap:6px">
-          <span style="display:inline-flex; align-items:center; gap:6px">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
-            </svg>
-            Oakville, Ontario
-          </span>
-          <span style="display:inline-flex; align-items:center; gap:6px">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/>
-            </svg>
-            <a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a>
-          </span>
-        </p>
-
-        <p>Data/AI-focused professional building practical, fast, and useful solutions.</p>
-        
-        <!-- vertical buttons -->
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-width:260px">
-          <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" title="GitHub" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">GitHub</a>
-          <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">LinkedIn</a>
-          <a class="btn" href="#projects" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Projects</a>
-          <a class="btn" href="./Website_resume.pdf" download title="Download Resume" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Resume</a>
+      <div class="themeRow">
+        <span class="mini">Theme:</span>
+        <div class="select-wrap">
+          <label class="sr-only" for="themeSel">Theme</label>
+          <select id="themeSel" class="select" title="Theme">
+            <option value="blue">Blue gradient</option>
+            <option value="green">Green gradient</option>
+            <option value="purple">Purple gradient</option>
+          </select>
         </div>
       </div>
 
-      <!-- right column: hero image -->
-      <div class="hero-figure">
-        <img src="https://MandeepKourSardarni.github.io/image.png" alt="Mandeep hero" loading="lazy" decoding="async" />
-      </div>
-    </section>
-
-    <section id="about" class="grid" style="padding:20px 0">
-      <h2>About</h2>
-      <div class="card">
-        <p>
-          I’m a Data and AI–focused professional with a strong foundation in analytics, automation, and people operations.
-          I enjoy bridging the gap between data and business by building tools that simplify complex decisions and deliver measurable value—fast.
-          My approach combines technical problem-solving with a people-centric mindset, ensuring every solution is both efficient and impactful.
-        </p>
-      </div>
-    </section>
-
-    <section id="skills" style="padding:20px 0">
-      <h2>Skills</h2>
-      <div class="chips">
-        <span class="chip">Python</span>
-        <span class="chip">SQL</span>
-        <span class="chip">IBM Cognos</span>
-        <span class="chip">Power BI</span>
-        <span class="chip">Tableau</span>
-        <span class="chip">Google Looker</span>
-        <span class="chip">Generative AI</span>
-        <span class="chip">HTML/CSS</span>
-        <span class="chip">AWS (basics)</span>
-        <span class="chip">Azure (basics)</span>
-        <span class="chip">GitHub</span>
-      </div>
-    </section>
-
-    <section id="projects" style="padding:20px 0">
-      <h2>Projects</h2>
-      <div class="projects">
-        <a class="proj card" href="https://github.com/MandeepKourSardarni/IBM-Cognos" target="_blank" rel="noreferrer">
-          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200" alt="IBM Cognos Dashboard" />
-          <h3>Dashboard – IBM Cognos</h3>
-          <p>Interactive job market dashboard (Naukri dataset): hiring trends, skills, demographics.</p>
-        </a>
-
-        <a class="proj card" href="https://github.com/MandeepKourSardarni/Tambola" target="_blank" rel="noreferrer">
-          <img src="https://raw.githubusercontent.com/MandeepKourSardarni/Tambola/main/Tambola.png" alt="Tambola Game" />
-          <h3>Tambola/Bingo/Housie Game</h3>
-          <p>Projector-friendly spinner with wheel, music, confetti, Excel export, ticket generator.</p>
-        </a>
-
-        <a class="proj card" href="https://mandeepkoursardarni.github.io/Human_Bingo/" target="_blank" rel="noreferrer">
-          <img src="H_Bingo.png" alt="Human_Tambola" />
-          <h3>Human Bingo — Ice breaker</h3>
-          <p>Interactive Human Bingo — Player, Host & Bulk tickets download option</p>
-        </a>
-
-        <a class="proj card" href="https://github.com/MandeepKourSardarni/Covid19-chest-xray-app" target="_blank" rel="noreferrer">
-          <img src="https://MandeepKourSardarni.github.io/Covid.png" alt="COVID-19 X-ray project" />
-          <h3>COVID-19 Detection from Chest X-Rays (VGG + Flask)</h3>
-          <p>End-to-end deep learning pipeline to classify COVID vs Normal on chest X-rays.</p>
-        </a>
-
-        <a class="proj card" href="https://github.com/MandeepKourSardarni/Payslip_Redactor" target="_blank" rel="noreferrer">
-          <img src="https://MandeepKourSardarni.github.io/Redact.png" alt="PDF Payslip Redactor" />
-          <h3>PDF Payslip Redactor (PyMuPDF + Tesseract)</h3>
-          <p>Redacts SIN, addresses, emails, phones, banking info, DOB, and more.</p>
-        </a>
-      </div>
-    </section>
-
-    <section id="experience" style="padding:20px 0">
-      <h2>Experience</h2>
-      <div class="grid">
-        <div class="card">
-          <strong>Business Analyst → Virtusa</strong>
-          <div class="muted">Jan 2022 – Mar 2023</div>
-          <ul>
-            <li>Streamlined workflows for data acquisition & reporting; enabled planning via Excel, SharePoint & Tableau.</li>
-            <li>Partnered with global stakeholders to capture & refine requirements.</li>
-            <li>Produced governance decks & executive reports (DOR, WOR, MOR).</li>
-            <li>Built trackers & KPI dashboards for SLA/OLA compliance, audits & optimization.</li>
-            <li>Resolved client escalations with RCA, ensured compliance, uncovered opportunities.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section id="certifications" style="padding:20px 0">
-      <h2>Certifications</h2>
-      <div class="card">
-        <p><strong>IBM Data Analyst Professional Certificate</strong> — Sep 2025</p>
-        <p><strong>Microsoft Azure AI-900 Fundamentals</strong> — Jul 2025</p>
-        <p><strong>Generative AI for Business (MS Azure + OpenAI)</strong> — Apr 2024</p>
-        <p><strong>AWS Cloud Practitioner Essentials</strong> — 2022</p>
-        <p><strong>AWS Cloud Economics Accreditation</strong> — 2022</p>
-        <p><strong>Udemy: Business Analysis Fundamentals</strong> — 2021</p>
-        <p><strong>Great Learning: Data Visualization with Tableau</strong> — 2021</p>
-      </div>
-    </section>
-
-    <section id="education" style="padding:20px 0">
-      <h2>Education</h2>
-      <div class="card">
-        <p><strong>Master’s in Data Science</strong> — Deakin University, Australia (2023–2024)</p>
-        <p><strong>PG Program in AI/ML</strong> — Great Lakes & UT Austin McCombs, USA (2020–2022)</p>
-      </div>
-
-      <div class="card">
-        <strong>Junior Data Analyst Program • NPower Canada</strong>
-        <div class="muted">Jun 2025 – Sep 2025</div>
-        <ul>
-          <li>Data wrangling, analysis & visualization using Excel, Python (Pandas, NumPy, Matplotlib, Seaborn, Plotly, Dash), SQL & IBM Cognos.</li>
-          <li>Capstone: data collection, EDA, statistical analysis & dashboarding.</li>
-          <li>Hands-on with Agile Project Management lifecycle.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="contact" style="padding:20px 0 40px">
-      <h2>Contact</h2>
-      <div class="row" style="gap:8px">
-        <a href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer"
-           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
-          <i data-feather="linkedin" class="icon"></i> LinkedIn
-        </a>
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mandeepkour0917@gmail.com&su=Hello%20from%20your%20portfolio"
-           target="_blank" rel="noreferrer"
-           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
-          <i data-feather="mail" class="icon"></i> Mail
-        </a>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container" style="padding:18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <small class="muted">© <span id="year"></span> Mandeep</small>
-      <div class="row">
-        <a href="#home" class="muted">Top</a>
-        <a href="#projects" class="muted">Projects</a>
-        <a href="#contact" class="muted">Contact</a>
+      <div class="options">
+        <button id="goPlayer" class="choice"><strong>Player</strong><div class="mini">Pick grid on the next screen</div></button>
+        <button id="goHost"  class="choice"><strong>Host</strong><div class="mini">Draw Next • Reset • Close</div></button>
+        <button id="goBulk"  class="choice"><strong>Bulk download</strong><div class="mini">Generate printable stacks</div></button>
       </div>
     </div>
-  </footer>
+  </main>
 
-  <!-- Feather icons -->
-  <script src="https://unpkg.com/feather-icons"></script>
+  <!-- Player -->
+  <section id="player" class="screen" aria-labelledby="player-title">
+    <h2 id="player-title" class="sr-only">Player</h2>
+    <div class="toolbar">
+      <span class="hint">Select grid:</span>
+      <div class="seg">
+        <button class="btn pill gridPick" data-size="3">3×3</button>
+        <button class="btn pill gridPick" data-size="4">4×4</button>
+        <button class="btn pill gridPick" data-size="5">5×5</button>
+      </div>
+      <div class="seg">
+        <button id="undo" class="btn pill">Undo</button>
+        <button id="resetPlayer" class="btn pill">Reset</button>
+        <button id="dlPlayer" class="btn pill">Download PDF</button>
+        <button id="closePlayer" class="btn pill">Close</button>
+      </div>
+    </div>
+    <div id="playerCard"></div>
+  </section>
+
+  <!-- Host -->
+  <section id="host" class="screen" aria-labelledby="host-title">
+    <div class="host-wrap">
+      <h2 id="host-title" class="sr-only">Host</h2>
+      <div class="toolbar">
+        <button id="drawNext" class="btn pill">Draw Next</button>
+        <button id="resetDraw" class="btn pill">Reset Draws</button>
+        <button id="dlHost" class="btn pill">Download Excel</button>
+        <button id="closeHost" class="btn pill">Close</button>
+      </div>
+      <div class="host-big"><div id="hostCurrent" class="host-current">Press “Draw Next” to begin</div></div>
+      <div class="mini" style="margin-top:8px; color:#fff">Drawn: <span id="drawnCount">0</span>/50</div>
+      <div id="calledChips" class="chips" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Bulk -->
+  <section id="bulk" class="screen" aria-labelledby="bulk-title">
+    <h2 id="bulk-title" class="sr-only">Bulk Download</h2>
+    <div class="toolbar">
+      <div class="seg">
+        <span class="hint">Cards:</span>
+        <button class="btn pill selectable count" data-count="20" aria-pressed="false">20</button>
+        <button class="btn pill selectable count" data-count="30" aria-pressed="false">30</button>
+        <button class="btn pill selectable count" data-count="40" aria-pressed="false">40</button>
+        <button class="btn pill selectable count" data-count="50" aria-pressed="false">50</button>
+      </div>
+      <div class="seg">
+        <span class="hint">Grid:</span>
+        <button class="btn pill selectable bulkGrid" data-size="3" aria-pressed="false">3×3</button>
+        <button class="btn pill selectable bulkGrid" data-size="4" aria-pressed="false">4×4</button>
+        <button class="btn pill selectable bulkGrid" data-size="5" aria-pressed="false">5×5</button>
+      </div>
+      <div class="seg">
+        <button id="bulkMake" class="btn pill">Generate Preview</button>
+        <button id="bulkDownload" class="btn pill" style="display:none; border-color:#fff">Download / Print</button>
+        <button id="closeBulk" class="btn pill">Close</button>
+      </div>
+    </div>
+    <div id="bulkGridWrap" class="grid" aria-live="polite"></div>
+  </section>
+
+  <!-- Rules Modal -->
+  <div id="rules" class="rules" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="sheet">
+      <h3 id="rulesTitle">Human Bingo — Rules</h3>
+      <ul>
+        <li>Tap/click squares to mark when a prompt fits someone in the room.</li>
+        <li>FREE center on 5×5 cards. 3×3 and 4×4 have no free center.</li>
+        <li><strong>Lines:</strong> Complete any row or column to claim a line.</li>
+        <li><strong>Bottom Line:</strong> Fill the bottom row.</li>
+        <li><strong>Diagonals:</strong> Either main diagonal counts.</li>
+        <li><strong>House/Bingo:</strong> Mark every square (FREE counts).</li>
+      </ul>
+      <div class="closeRow"><button id="closeRules" class="btn pill">Close</button></div>
+    </div>
+  </div>
+
+  <!-- QR Modal -->
+  <div id="qrModal" class="rules" role="dialog" aria-modal="true" aria-labelledby="qrTitle" style="display:none">
+    <div class="sheet" style="text-align:center">
+      <h3 id="qrTitle">Scan to open Human Bingo</h3>
+      <div id="qrBox" style="display:grid; place-items:center; padding:8px;">
+        <img id="qrImg" alt="QR code for Human Bingo" width="240" height="240"
+             style="border-radius:12px; background:#fff; padding:8px;"/>
+        <div class="mini" style="margin-top:8px; color:#fff">
+          <a id="qrLink" href="#" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:underline;">
+            Open link
+          </a>
+        </div>
+      </div>
+      <div class="closeRow">
+        <button id="copyQRLink" class="btn pill">Copy link</button>
+        <button id="printQR" class="btn pill">Print</button>
+        <button id="closeQR" class="btn pill">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti + audio -->
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+  <audio id="bgAudio" preload="none" loop></audio>
+
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
   <script>
-    if (window.feather) feather.replace();
-    document.getElementById('year').textContent = new Date().getFullYear();
+    /* ---------- Header height -> screen fit ---------- */
+    function setHeaderHeightVar(){
+      const h=document.getElementById('appHeader').offsetHeight;
+      document.documentElement.style.setProperty('--headerH', h+'px');
+    }
+    addEventListener('resize', setHeaderHeightVar);
+    addEventListener('DOMContentLoaded', setHeaderHeightVar);
+
+    /* ---------- Prompts (50) — emojis allowed; PDFs strip them ---------- */
+    const PROMPTS = [
+      "Who is wearing mismatched socks? 🧦🧦",
+      "Who has a pen clipped to their shirt? 🖊️👔",
+      "Who has bright colored shoelaces? 👟🌈",
+      "Who has nail polish on? 💅",
+      "Who in the room is carrying a receipt? 🧾",
+      "Who has their phone on silent right now? 🔕📱",
+      "Who can show a selfie with a pet? 🐶🐱🤳",
+      "Who is wearing our company-branded shirt? 👕🏢",
+      "Has waved goodbye then couldn’t find the “Leave” button 🙃😎",
+      "Who has a ring on their finger? 💍",
+      "Who has more than 100 unread notifications/emails? 📧📱😵🙈😄",
+      "Who is carrying a five dollar bill? 💵5️⃣",
+      "Can freeze perfectly like a laggy video for 15 seconds 🗽😄",
+      "Who has a photo of their family or kids as their wallpaper? 👨‍👩‍👧‍👦📱",
+      "Can name five Gen Z slang words 🧠⚡",
+      "Knows ASL 🤟",
+      "Faked illness for a leave 😷🤫",
+      "Can imitate a teammate/manager's signature meeting greeting (with consent) 🎭🤝",
+      "Went viral online 📈🔥",
+      "Owns a gaming computer 🖥️🎮",
+      "Knows how to Dance 💃🕺",
+      "Has an unusual family (fun) tradition 🎎🎉",
+      "Loves true crime podcasts 🎧🕵️‍♂️",
+      "Likes pineapple on pizza 🍍🍕",
+      "Been on a bad (blind) date 🙈😬",
+      "Proposed to spouse in public 💞💍🎤",
+      "Has a calendar block called 'Focus' that is 90% not focusing 🎯😅🙃",
+      "Loves roller coasters 🎢",
+      "Does Yoga 🧘",
+      "Can do a cartwheel 🤸",
+      "Has a snack hidden in their bag/desk 🍫🍪",
+      "Knows martial arts (show us one) 🥋",
+      "Can make a paper airplane in under a minute (first five to raise a hand get a sheet of paper) 🛩️📄",
+      "Attended a concert this year 🎶🎤",
+      "Has 3 coins (any currency) 🪙🪙🪙",
+      "Can name 5 keyboard shortcuts without looking ⌨️5️⃣🏆",
+      "Been on a road trip 🚗🗺️",
+      "Screams during scary movies 😱🎥😂",
+      "Loves karaoke 🎤🎵",
+      "Has a folder named “final_final_FINAL” (and it isn’t final) 😂🤣",
+      "Keeps screen brightness at sun or cave; no in-between  ☀️⚫ 😂",
+      "Has been skydiving 🪂",
+      "Ignores mails from HR 😎📧🙈",
+      "Wearing Pink/Green shirt 👚👕💖❤️",
+      "Has taken a selfie today 🤳",
+      "Same birth month as their partner ❤️🎂",
+      "Ready to gift me $100 😂💰💵",
+      "Owns a cable that fits nothing they currently own 🗄️🙃😂",
+      "Has a lipstick/makeup product with them 💄",
+      "Can do 10 pushups 💪🔟"
+    ];
+
+    /* ---------- Helpers & Router ---------- */
+    const $=(s,el=document)=>el.querySelector(s);
+    const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+    const rand=n=>Math.floor(Math.random()*n);
+    const shuffle=a=>a.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+    const pickPrompts=n=>shuffle(PROMPTS.slice()).slice(0,n);
+
+    const screens={landing:$('#landing'), player:$('#player'), host:$('#host'), bulk:$('#bulk')};
+    function show(id){ Object.values(screens).forEach(el=>el.classList.remove('active')); screens[id].classList.add('active'); }
+
+    $('#goPlayer').addEventListener('click', ()=>show('player'));
+    $('#goHost').addEventListener('click', ()=>{ resetDraws(); show('host'); });
+    $('#goBulk').addEventListener('click', ()=>{ $('#bulkGridWrap').innerHTML=''; $('#bulkDownload').style.display='none'; show('bulk'); });
+    $('#closePlayer').addEventListener('click', ()=>show('landing'));
+    $('#closeHost').addEventListener('click', ()=>show('landing'));
+    $('#closeBulk').addEventListener('click', ()=>show('landing'));
+
+    /* ---------- Theme system ---------- */
+    const THEMES = {
+      blue:  { bg1:'#86d7ff', bg2:'#142b6f', bg3:'#6f38c5', panel:'#223296', panel2:'#1b287a', accent:'#8be9fd' },
+      green: { bg1:'#baf7d6', bg2:'#0b4f3b', bg3:'#2a9d8f', panel:'#0e5a45', panel2:'#0a4635', accent:'#9ef7c1' },
+      purple:{ bg1:'#e7ddff', bg2:'#3a2a8c', bg3:'#7b3fe4', panel:'#2f2173', panel2:'#24195b', accent:'#cbb7ff' }
+    };
+    function applyTheme(key){
+      const t = THEMES[key] || THEMES.blue;
+      const root = document.documentElement.style;
+      root.setProperty('--bg1', t.bg1);
+      root.setProperty('--bg2', t.bg2);
+      root.setProperty('--bg3', t.bg3);
+      root.setProperty('--panel', t.panel);
+      root.setProperty('--panel2', t.panel2);
+      root.setProperty('--accent', t.accent);
+      localStorage.setItem('hb_theme', key);
+    }
+    const themeSel = document.getElementById('themeSel');
+    if(themeSel){
+      themeSel.addEventListener('change', e=>applyTheme(e.target.value));
+    }
+
+    /* ---------- Card factory ---------- */
+    function buildBoard(size,onToggle){
+      const free=size===5;
+      const need=size*size-(free?1:0);
+      const prompts=pickPrompts(need);
+      const tbl=document.createElement('table'); tbl.dataset.size=String(size); let i=0;
+
+      for(let r=0;r<size;r++){
+        const tr=document.createElement('tr');
+        for(let c=0;c<size;c++){
+          const td=document.createElement('td'); td.dataset.r=r; td.dataset.c=c;
+
+          // a11y + initial state
+          td.setAttribute('role','button');
+          td.tabIndex = 0;
+          td.setAttribute('aria-pressed','false');
+
+          if(free && r===Math.floor(size/2) && c===Math.floor(size/2)){
+            td.textContent='FREE';
+            td.classList.add('free','marked');
+            td.setAttribute('aria-pressed','true');
+          } else {
+            td.textContent=prompts[i++];
+          }
+
+          const toggle = () => {
+            const marked = td.classList.toggle('marked');
+            td.setAttribute('aria-pressed', marked ? 'true' : 'false');
+            onToggle && onToggle(tbl, td);
+          };
+
+          // Single input path for mouse/touch/pen
+          if (window.PointerEvent) td.addEventListener('pointerup', toggle);
+          else td.addEventListener('click', toggle);
+
+          // Keyboard
+          td.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+          });
+
+          tr.appendChild(td);
+        }
+        tbl.appendChild(tr);
+      }
+      return tbl;
+    }
+
+    function makeCard(idx,size,title,onToggle){
+      const card=document.createElement('div'); card.className='card';
+      const head=document.createElement('div'); head.className='card-header';
+      head.innerHTML=`<div class="card-title">${title} <span class="mini">Card #${idx+1}</span></div><div class="mini">v2.9</div>`;
+      const body=document.createElement('div'); body.className='board';
+      body.appendChild(buildBoard(size,onToggle));
+      card.appendChild(head); card.appendChild(body);
+      return card;
+    }
+
+    /* ---------- Player mode ---------- */
+    let undoStack=[], playerSize=null, achieved={line:false,bottom:false,diag:false,full:false};
+    function resetAchievements(){ achieved={line:false,bottom:false,diag:false,full:false}; }
+
+    function checkAchievements(tbl){
+      const n=+tbl.dataset.size, rows=Array(n).fill(0), cols=Array(n).fill(0); let d1=0,d2=0;
+      $$('.marked',tbl).forEach(td=>{ const r=+td.dataset.r,c=+td.dataset.c; rows[r]++; cols[c]++; if(r===c) d1++; if(r+c===n-1) d2++; });
+      const total=$$('.marked',tbl).length;
+      const line=rows.some(v=>v===n)||cols.some(v=>v===n);
+      const bottom=rows[n-1]===n;
+      const diag=(d1===n||d2===n);
+      const full=(total===n*n);
+      if(bottom && !achieved.bottom){achieved.bottom=true; confetti('Bottom Line!');}
+      if(line && !achieved.line){achieved.line=true; confetti('Line Complete!');}
+      if(diag && !achieved.diag){achieved.diag=true; confetti('Diagonal!');}
+      if(full && !achieved.full){achieved.full=true; confetti('HOUSE / BINGO!');}
+    }
+
+    function renderPlayerCard(){
+      const mount=$('#playerCard'); mount.innerHTML='';
+      if(playerSize==null) return;
+      undoStack=[]; resetAchievements();
+      mount.appendChild(makeCard(0,playerSize,'Your Human Bingo Card',(tbl,td)=>{ undoStack.push(td); if(undoStack.length>300) undoStack.shift(); checkAchievements(tbl); }));
+    }
+    $('.gridPick[data-size="3"]').addEventListener('click',()=>{playerSize=3; renderPlayerCard();});
+    $('.gridPick[data-size="4"]').addEventListener('click',()=>{playerSize=4; renderPlayerCard();});
+    $('.gridPick[data-size="5"]').addEventListener('click',()=>{playerSize=5; renderPlayerCard();});
+    $('#undo').addEventListener('click',()=>{const last=undoStack.pop(); if(last) last.classList.toggle('marked');});
+    $('#resetPlayer').addEventListener('click',()=>{playerSize=null; renderPlayerCard();});
+
+    /* ---------- PDF helpers ---------- */
+    function sanitizeForPDF(str){
+      if(!str) return '';
+      str = str.replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/[–—]/g,'-');
+      str = str.replace(/\p{Extended_Pictographic}|\uFE0F|\u200D/gu,''); // strip emojis/ZWJ/VS
+      str = str.replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'');                 // ASCII-only
+      return str.trim();
+    }
+    function extractBoardFromTable(tableEl){
+      const rows=[...tableEl.querySelectorAll('tr')];
+      const n=rows.length;
+      const data=rows.map(tr=>[...tr.children].map(td=>td.textContent.trim()));
+      return {size:n, cells:data};
+    }
+    function drawTicketTablePDF(pdf, title, cells){
+      const n=cells.length;
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const outerMargin = 28;
+      const headerH = 44;
+      const maxW = pageW - outerMargin*2;
+      const maxH = pageH - outerMargin*2 - headerH;
+      const tableSize = Math.min(maxW, maxH);
+      const x0 = (pageW - tableSize)/2;
+      const y0 = outerMargin + headerH;
+
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(18);
+      const titleW = pdf.getTextWidth('Human Bingo');
+      pdf.text('Human Bingo', (pageW-titleW)/2, outerMargin + 18);
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(12);
+      pdf.text(sanitizeForPDF(title), outerMargin, outerMargin + 18);
+
+      const cell = tableSize / n;
+      pdf.setDrawColor(0); pdf.setLineWidth(1.2);
+      pdf.rect(x0, y0, tableSize, tableSize);
+      pdf.setLineWidth(0.6);
+      for(let i=1;i<n;i++){
+        pdf.line(x0, y0 + i*cell, x0 + tableSize, y0 + i*cell);
+        pdf.line(x0 + i*cell, y0, x0 + i*cell, y0 + tableSize);
+      }
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(12);
+      const pad = 6, lineH=12;
+      for(let r=0;r<n;r++){
+        for(let c=0;c<n;c++){
+          const txt = sanitizeForPDF(cells[r][c] || '');
+          const wrapped = pdf.splitTextToSize(txt, cell - 2*pad);
+          const blockH = wrapped.length * lineH;
+          const tx = x0 + c*cell + pad;
+          const ty = y0 + r*cell + (cell - blockH)/2 + 9;
+          wrapped.forEach((line, i)=> pdf.text(line, tx, ty + i*lineH));
+        }
+      }
+    }
+    function drawTicketInRect(pdf, title, cells, rx, ry, rw, rh){
+      const n=cells.length;
+      const headerH = 24;
+      const tableSize = Math.min(rw, rh - headerH);
+      const x0 = rx + (rw - tableSize)/2;
+      const y0 = ry + headerH + (rh - headerH - tableSize)/2;
+
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(12);
+      pdf.text(sanitizeForPDF(title), rx + 6, ry + 16);
+
+      const cell = tableSize / n;
+      pdf.setDrawColor(0); pdf.setLineWidth(1.1);
+      pdf.rect(x0, y0, tableSize, tableSize);
+      pdf.setLineWidth(0.55);
+      for(let i=1;i<n;i++){
+        pdf.line(x0, y0 + i*cell, x0 + tableSize, y0 + i*cell);
+        pdf.line(x0 + i*cell, y0, x0 + i*cell, y0 + tableSize);
+      }
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(12);
+      const pad = 5, lineH=12;
+      for(let r=0;r<n;r++){
+        for(let c=0;c<n;c++){
+          const txt = sanitizeForPDF(cells[r][c] || '');
+          const wrapped = pdf.splitTextToSize(txt, cell - 2*pad);
+          const blockH = wrapped.length * lineH;
+          const tx = x0 + c*cell + pad;
+          const ty = y0 + r*cell + (cell - blockH)/2 + 9;
+          wrapped.forEach((line, i)=> pdf.text(line, tx, ty + i*lineH));
+        }
+      }
+    }
+
+    /* Player: Download current ticket */
+    function playerDownloadPDF(){
+      const table=$('#playerCard table');
+      if(!table){ alert('Create a card first.'); return; }
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','pt','a4');
+      const {cells} = extractBoardFromTable(table);
+      drawTicketTablePDF(pdf, 'Player Ticket', cells);
+      pdf.save('human-bingo-ticket.pdf');
+    }
+    $('#dlPlayer').addEventListener('click', playerDownloadPDF);
+
+    /* ---------- Host mode ---------- */
+    let deck=[], drawn=[];
+    function resetDraws(){ deck=PROMPTS.slice(0,50); drawn=[]; $('#hostCurrent').textContent='Press “Draw Next” to begin'; $('#drawnCount').textContent='0'; $('#calledChips').innerHTML=''; }
+    function drawNext(){
+      if(deck.length===0){ $('#hostCurrent').textContent='All prompts have been drawn!'; return; }
+      const idx=rand(deck.length), prompt=deck.splice(idx,1)[0]; drawn.push(prompt);
+      $('#hostCurrent').textContent=prompt; $('#drawnCount').textContent=String(drawn.length);
+      const chip=document.createElement('span'); chip.className='chip'; chip.textContent=prompt; $('#calledChips').prepend(chip);
+    }
+    $('#drawNext').addEventListener('click',drawNext);
+    $('#resetDraw').addEventListener('click',resetDraws);
+
+    function downloadHostCSV(){
+      if(drawn.length===0){ alert('Draw some cards first.'); return; }
+      const rows=[["Serial Number","Card"], ...drawn.map((p,i)=>[i+1, p])];
+      const csv='\uFEFF' + rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='human-bingo-draws.csv'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),500);
+    }
+    $('#dlHost').addEventListener('click', downloadHostCSV);
+
+    /* ---------- Bulk generator ---------- */
+    let bulkCount=null, bulkSize=null;
+    function markSelected(groupSel, el){
+      $$(groupSel).forEach(b=>{ b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
+      el.classList.add('selected'); el.setAttribute('aria-pressed','true');
+    }
+    $$('.count').forEach(b=>b.addEventListener('click',()=>{ bulkCount=+b.dataset.count; markSelected('.count', b); }));
+    $$('.bulkGrid').forEach(b=>b.addEventListener('click',()=>{ bulkSize=+b.dataset.size; markSelected('.bulkGrid', b); }));
+
+    $('#bulkMake').addEventListener('click',()=>{
+      if(!bulkCount || !bulkSize){ alert('Select both Cards and Grid.'); return; }
+      const wrap=$('#bulkGridWrap'); wrap.innerHTML='';
+      for(let i=0;i<bulkCount;i++) wrap.appendChild(makeCard(i,bulkSize,'Human Bingo',null));
+      const btn=$('#bulkDownload'); btn.style.display='inline-block'; btn.style.borderColor='#fff';
+    });
+
+    function downloadBulkPDF(){
+      const cards = $$('#bulkGridWrap .card');
+      if(cards.length===0){ alert('Generate a preview first.'); return; }
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','pt','a4');
+
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const outer = 26;
+      const gap = 18;
+      const availH = pageH - 2*outer;
+      const eachH = (availH - gap)/2;
+      const rectW = pageW - 2*outer;
+      const topRect = {x:outer, y:outer, w:rectW, h:eachH};
+      const botRect = {x:outer, y:outer+eachH+gap, w:rectW, h:eachH};
+
+      let first=true;
+      for(let i=0;i<cards.length;i+=2){
+        if(!first) pdf.addPage(); first=false;
+
+        const topTable = cards[i].querySelector('table');
+        const {cells:cellsTop} = extractBoardFromTable(topTable);
+        drawTicketInRect(pdf, `Card #${i+1}`, cellsTop, topRect.x, topRect.y, topRect.w, topRect.h);
+
+        if(i+1 < cards.length){
+          const botTable = cards[i+1].querySelector('table');
+          const {cells:cellsBot} = extractBoardFromTable(botTable);
+          drawTicketInRect(pdf, `Card #${i+2}`, cellsBot, botRect.x, botRect.y, botRect.w, botRect.h);
+        }
+      }
+
+      pdf.save('human-bingo-bulk-2up.pdf');
+    }
+    $('#bulkDownload').addEventListener('click', downloadBulkPDF);
+
+    /* ---------- Rules, QR, Confetti, Music, Reset ---------- */
+    $('#openRules').addEventListener('click',()=>$('#rules').style.display='flex');
+    $('#closeRules').addEventListener('click',()=>$('#rules').style.display='none');
+
+    // QR modal
+    const APP_URL = (new URL('.', location.href)).href; // current page base (no hash/query)
+    const QR_API  = 'https://api.qrserver.com/v1/create-qr-code/';
+    function openQR(){
+      const src = `${QR_API}?size=240x240&data=${encodeURIComponent(APP_URL)}`;
+      $('#qrImg').src = src;
+      $('#qrLink').href = APP_URL;
+      $('#qrModal').style.display = 'flex';
+    }
+    $('#openQR').addEventListener('click', openQR);
+    $('#closeQR').addEventListener('click', ()=> $('#qrModal').style.display='none');
+    $('#copyQRLink').addEventListener('click', async ()=>{
+      try { await navigator.clipboard.writeText(APP_URL); alert('Link copied!'); }
+      catch { alert(APP_URL); }
+    });
+    $('#printQR').addEventListener('click', ()=>{
+      const src = $('#qrImg').src || `${QR_API}?size=240x240&data=${encodeURIComponent(APP_URL)}`;
+      const w = window.open('', '_blank', 'width=360,height=420');
+      w.document.write(`
+        <title>Human Bingo QR</title>
+        <div style="text-align:center; font:14px sans-serif; padding:14px;">
+          <img src="${src}" width="240" height="240"
+               style="display:block; margin:10px auto; border:1px solid #ccc; padding:8px; background:#fff; border-radius:8px"/>
+          <div>${APP_URL}</div>
+        </div>
+      `);
+      w.document.close(); w.focus(); w.print();
+      setTimeout(()=> w.close(), 600);
+    });
+
+    function confetti(msg){
+      const layer=$('#confetti'); layer.innerHTML='';
+      const banner=document.createElement('div');
+      banner.style.position='fixed'; banner.style.top='18%'; banner.style.left='50%'; banner.style.transform='translateX(-50%)';
+      banner.style.padding='14px 20px'; banner.style.border='2px solid var(--accent)'; banner.style.borderRadius='14px';
+      banner.style.background='linear-gradient(180deg,var(--panel),var(--panel2))';
+      banner.style.fontFamily='Quicksand,Inter'; banner.style.fontWeight='800'; banner.style.color='#fff'; banner.textContent=msg;
+      layer.appendChild(banner);
+      const colors=['#ff4d4d','#ffd166','#06d6a0','#1e90ff','#c77dff'];
+      for(let i=0;i<110;i++){ const s=document.createElement('span'); s.style.left=(Math.random()*100)+'vw'; s.style.top='-10px'; s.style.background=colors[i%colors.length]; s.style.animationDelay=(Math.random()*280)+'ms'; layer.appendChild(s); }
+      setTimeout(()=>{ layer.innerHTML=''; },2100);
+    }
+
+    const audio=$('#bgAudio'); audio.volume=0.6; let isPlaying=false;
+    audio.addEventListener('error',()=>alert('Audio file not found. Check your assets/ paths and filenames.'));
+    function setTrack(src){ audio.pause(); isPlaying=false; audio.src=src; }
+    function toggleMusic(){
+      if(!audio.src){ setTrack($('#musicMode').value); }
+      if(!isPlaying){ audio.play().then(()=>{ isPlaying=true; }).catch(()=>{ alert('Could not play audio. Ensure MP3s are in assets/ and you have tapped once.'); }); }
+      else{ audio.pause(); isPlaying=false; }
+    }
+    $('#musicMode').addEventListener('change', e=>{ setTrack(e.target.value); if(isPlaying){ audio.play().catch(()=>{}); }});
+    $('#musicToggle').addEventListener('click', toggleMusic);
+
+    function resetAll(){
+      audio.pause(); isPlaying=false;
+      $('#musicMode').value='assets/bensound-ukulele.mp3'; setTrack('assets/bensound-ukulele.mp3');
+      show('landing'); playerSize=null; renderPlayerCard(); resetDraws();
+      $('#bulkGridWrap').innerHTML=''; $('#bulkDownload').style.display='none';
+      $$('.count, .bulkGrid').forEach(b=>{ b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
+      bulkCount=null; bulkSize=null;
+    }
+    $('#resetAll').addEventListener('click', resetAll);
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      show('landing'); resetDraws(); setTrack('assets/bensound-ukulele.mp3'); setHeaderHeightVar();
+      const saved = localStorage.getItem('hb_theme') || 'blue';
+      if(themeSel){ themeSel.value = saved; } applyTheme(saved);
+
+      // Try to start background video (some browsers delay until a gesture)
+      const vid = document.getElementById('bgVideo');
+      if (vid) {
+        const tryPlay = () => vid.play().catch(()=>{});
+        tryPlay();
+        // Start on first user interaction if autoplay was blocked
+        const kick = () => { tryPlay(); document.removeEventListener('pointerdown', kick); document.removeEventListener('touchstart', kick); };
+        document.addEventListener('pointerdown', kick, { once:true });
+        document.addEventListener('touchstart', kick, { once:true });
+      }
+    });
   </script>
 </body>
 </html>
-
-
