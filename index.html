@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- ✅ NEW: Preload the local video and the poster to eliminate the grey flash -->
-  <link rel="preload" as="video" href="/TechV.mp4" type="video/mp4" crossorigin>
+  <!-- Preload (works for same-origin only; harmless if file not present locally) -->
+  <link rel="preload" as="video" href="./TechV.mp4" type="video/mp4">
   <link rel="preload" as="image" href="/tech-poster.jpg">
 
   <style>
@@ -20,40 +20,44 @@
     }
     html{scroll-behavior:smooth}
 
-    /* ✅ UPDATED: Give an immediate, good-looking fallback (poster) so no grey gap */
-    html, body{
-      background:#0b1220;
-    }
+    /* Strong fallback color so there's NO grey flash */
     body{
       margin:0;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       line-height:1.6;
-      /* Show poster as background until video paints its first frame */
-      background-image:url('/tech-poster.jpg');
-      background-size:cover;
-      background-position:center;
-      background-attachment:fixed;
-      color:var(--text)
+      background:var(--bg);   /* solid fallback behind everything */
+      color:var(--text);
     }
     [data-theme="light"] body{color:var(--text-light)}
 
-    /* Background video + overlay */
+    /* Background layers: fallback still, then video, then readability overlay */
+    #bg-fallback{
+      position:fixed; inset:0; z-index:-3; pointer-events:none;
+      /* Show still instantly; if image missing, color still looks good */
+      background: #0b1220 url("/tech-poster.jpg") center/cover no-repeat;
+      opacity:1; transition: opacity .25s linear;
+    }
+
     #bg-video{
       position:fixed; inset:0; width:100%; height:100%;
-      object-fit:cover; z-index:-2;
-      /* ✅ Helps browsers start decoding sooner */
+      object-fit:cover; z-index:-2; pointer-events:none;
+      opacity:0; transition: opacity .25s linear; /* fade in when ready */
       background:#000;
     }
+
+    /* When video is ready, fade video up and still down */
+    body.video-ready #bg-video{ opacity:1; }
+    body.video-ready #bg-fallback{ opacity:0; }
+
     .video-overlay{
       position:fixed; inset:0; z-index:-1; pointer-events:none;
       background:linear-gradient(180deg, rgba(8,12,20,.55), rgba(8,12,20,.55));
     }
 
+    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce){
-      #bg-video{ display:none; }
-      .video-overlay{ display:none; }
-      body{ background:var(--bg); }
-      [data-theme="light"] body{ background:var(--bg-light); }
+      #bg-video, .video-overlay{ display:none; }
+      /* Keep the still background visible */
     }
 
     a{color:inherit;text-decoration:none}
@@ -113,14 +117,21 @@
 </head>
 
 <body>
+  <!-- Instant still (no grey flash) -->
+  <div id="bg-fallback" aria-hidden="true"></div>
+
   <!-- Fullscreen background video -->
   <video id="bg-video" autoplay muted loop playsinline preload="auto" poster="/tech-poster.jpg">
-    <!-- ✅ UPDATED: Try fast local file first on GitHub Pages -->
+    <!-- Prefer local/same-origin first (fast), then site root, then GitHub raw -->
+    <source src="./TechV.mp4" type="video/mp4" />
     <source src="/TechV.mp4" type="video/mp4" />
-    <!-- Fallback to Raw GitHub (slower, but universal) -->
     <source src="https://raw.githubusercontent.com/MandeepKourSardarni/MandeepKourSardarni.github.io/main/TechV.mp4" type="video/mp4" />
+    <!-- Optional legacy fallback you had -->
+    <source src="/Tech.mp4" type="video/mp4" />
   </video>
-  <div class="video-overlay"></div>
+
+  <!-- Readability overlay -->
+  <div class="video-overlay" aria-hidden="true"></div>
 
   <header class="header">
     <div class="container nav">
@@ -153,11 +164,13 @@
   </header>
 
   <main id="home" class="container">
-    <!-- ... your content unchanged ... -->
     <section class="hero grid grid-2">
+      <!-- left column -->
       <div>
         <div class="hero-badge">Hello, I'm</div>
         <h1>Mandeep Kour</h1>
+
+        <!-- location + email -->
         <p class="muted" style="margin:6px 0 14px; display:flex; flex-direction:column; gap:6px">
           <span style="display:inline-flex; align-items:center; gap:6px">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -172,7 +185,10 @@
             <a href="mailto:mandeepkour0917@gmail.com">mandeepkour0917@gmail.com</a>
           </span>
         </p>
+
         <p>Data/AI-focused professional building practical, fast, and useful solutions.</p>
+        
+        <!-- vertical buttons -->
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px; max-width:260px">
           <a class="btn" href="https://github.com/MandeepKourSardarni" target="_blank" rel="noreferrer" title="GitHub" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">GitHub</a>
           <a class="btn" href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">LinkedIn</a>
@@ -180,13 +196,138 @@
           <a class="btn" href="./Website_resume.pdf" download title="Download Resume" style="display:inline-flex;align-items:center;gap:8px;justify-content:center">Resume</a>
         </div>
       </div>
+
+      <!-- right column: hero image -->
       <div class="hero-figure">
         <img src="https://MandeepKourSardarni.github.io/image.png" alt="Mandeep hero" loading="lazy" decoding="async" />
       </div>
     </section>
 
-    <!-- other sections unchanged -->
-    <!-- ... -->
+    <section id="about" class="grid" style="padding:20px 0">
+      <h2>About</h2>
+      <div class="card">
+        <p>
+          I’m a Data and AI–focused professional with a strong foundation in analytics, automation, and people operations.
+          I enjoy bridging the gap between data and business by building tools that simplify complex decisions and deliver measurable value—fast.
+          My approach combines technical problem-solving with a people-centric mindset, ensuring every solution is both efficient and impactful.
+        </p>
+      </div>
+    </section>
+
+    <section id="skills" style="padding:20px 0">
+      <h2>Skills</h2>
+      <div class="chips">
+        <span class="chip">Python</span>
+        <span class="chip">SQL</span>
+        <span class="chip">IBM Cognos</span>
+        <span class="chip">Power BI</span>
+        <span class="chip">Tableau</span>
+        <span class="chip">Google Looker</span>
+        <span class="chip">Generative AI</span>
+        <span class="chip">HTML/CSS</span>
+        <span class="chip">AWS (basics)</span>
+        <span class="chip">Azure (basics)</span>
+        <span class="chip">GitHub</span>
+      </div>
+    </section>
+
+    <section id="projects" style="padding:20px 0">
+      <h2>Projects</h2>
+      <div class="projects">
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/IBM-Cognos" target="_blank" rel="noreferrer">
+          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200" alt="IBM Cognos Dashboard" />
+          <h3>Dashboard – IBM Cognos</h3>
+          <p>Interactive job market dashboard (Naukri dataset): hiring trends, skills, demographics.</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Tambola" target="_blank" rel="noreferrer">
+          <img src="https://raw.githubusercontent.com/MandeepKourSardarni/Tambola/main/Tambola.png" alt="Tambola Game" />
+          <h3>Tambola/Bingo/Housie Game</h3>
+          <p>Projector-friendly spinner with wheel, music, confetti, Excel export, ticket generator.</p>
+        </a>
+
+        <a class="proj card" href="https://mandeepkoursardarni.github.io/Human_Bingo/" target="_blank" rel="noreferrer">
+          <img src="H_Bingo.png" alt="Human_Tambola" />
+          <h3>Human Bingo — Ice breaker</h3>
+          <p>Interactive Human Bingo — Player, Host & Bulk tickets download option</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Covid19-chest-xray-app" target="_blank" rel="noreferrer">
+          <img src="https://MandeepKourSardarni.github.io/Covid.png" alt="COVID-19 X-ray project" />
+          <h3>COVID-19 Detection from Chest X-Rays (VGG + Flask)</h3>
+          <p>End-to-end deep learning pipeline to classify COVID vs Normal on chest X-rays.</p>
+        </a>
+
+        <a class="proj card" href="https://github.com/MandeepKourSardarni/Payslip_Redactor" target="_blank" rel="noreferrer">
+          <img src="https://MandeepKourSardarni.github.io/Redact.png" alt="PDF Payslip Redactor" />
+          <h3>PDF Payslip Redactor (PyMuPDF + Tesseract)</h3>
+          <p>Redacts SIN, addresses, emails, phones, banking info, DOB, and more.</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="experience" style="padding:20px 0">
+      <h2>Experience</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>Business Analyst → Virtusa</strong>
+          <div class="muted">Jan 2022 – Mar 2023</div>
+          <ul>
+            <li>Streamlined workflows for data acquisition & reporting; enabled planning via Excel, SharePoint & Tableau.</li>
+            <li>Partnered with global stakeholders to capture & refine requirements.</li>
+            <li>Produced governance decks & executive reports (DOR, WOR, MOR).</li>
+            <li>Built trackers & KPI dashboards for SLA/OLA compliance, audits & optimization.</li>
+            <li>Resolved client escalations with RCA, ensured compliance, uncovered opportunities.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="certifications" style="padding:20px 0">
+      <h2>Certifications</h2>
+      <div class="card">
+        <p><strong>IBM Data Analyst Professional Certificate</strong> — Sep 2025</p>
+        <p><strong>Microsoft Azure AI-900 Fundamentals</strong> — Jul 2025</p>
+        <p><strong>Generative AI for Business (MS Azure + OpenAI)</strong> — Apr 2024</p>
+        <p><strong>AWS Cloud Practitioner Essentials</strong> — 2022</p>
+        <p><strong>AWS Cloud Economics Accreditation</strong> — 2022</p>
+        <p><strong>Udemy: Business Analysis Fundamentals</strong> — 2021</p>
+        <p><strong>Great Learning: Data Visualization with Tableau</strong> — 2021</p>
+      </div>
+    </section>
+
+    <section id="education" style="padding:20px 0">
+      <h2>Education</h2>
+      <div class="card">
+        <p><strong>Master’s in Data Science</strong> — Deakin University, Australia (2023–2024)</p>
+        <p><strong>PG Program in AI/ML</strong> — Great Lakes & UT Austin McCombs, USA (2020–2022)</p>
+      </div>
+
+      <div class="card">
+        <strong>Junior Data Analyst Program • NPower Canada</strong>
+        <div class="muted">Jun 2025 – Sep 2025</div>
+        <ul>
+          <li>Data wrangling, analysis & visualization using Excel, Python (Pandas, NumPy, Matplotlib, Seaborn, Plotly, Dash), SQL & IBM Cognos.</li>
+          <li>Capstone: data collection, EDA, statistical analysis & dashboarding.</li>
+          <li>Hands-on with Agile Project Management lifecycle.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact" style="padding:20px 0 40px">
+      <h2>Contact</h2>
+      <div class="row" style="gap:8px">
+        <a href="https://www.linkedin.com/in/mandeep-kour-sardarni/" target="_blank" rel="noreferrer"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
+          <i data-feather="linkedin" class="icon"></i> LinkedIn
+        </a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mandeepkour0917@gmail.com&su=Hello%20from%20your%20portfolio"
+           target="_blank" rel="noreferrer"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px">
+          <i data-feather="mail" class="icon"></i> Mail
+        </a>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -200,16 +341,22 @@
     </div>
   </footer>
 
+  <!-- Feather icons -->
   <script src="https://unpkg.com/feather-icons"></script>
   <script>
     if (window.feather) feather.replace();
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Kick autoplay quickly (some iOS/Chrome conditions)
+    // Fade in video as soon as it can render a frame (no grey flash)
     const v = document.getElementById('bg-video');
-    const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(()=>{}); };
+    const markReady = () => document.body.classList.add('video-ready');
+
+    // Kick autoplay (mobile-safe) and mark ready when we can paint frames
+    function tryPlay(){ const p = v.play(); if (p && p.catch) p.catch(()=>{}); }
     if (document.readyState !== 'loading') tryPlay(); else document.addEventListener('DOMContentLoaded', tryPlay);
     window.addEventListener('pointerdown', tryPlay, { once:true });
+    v.addEventListener('loadeddata', markReady, { once:true });
+    v.addEventListener('playing', markReady, { once:true });
   </script>
 </body>
 </html>
